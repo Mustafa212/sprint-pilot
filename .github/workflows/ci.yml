@@ -1,0 +1,37 @@
+# Runs the launch script self-tests on Linux and Windows, and checks the plugin manifests.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  scripts:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: launch.sh self-tests
+        shell: bash
+        run: bash scripts/test/launch_test.sh
+      - name: launch.ps1 self-tests
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test/launch_test.ps1
+
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: plugin.json and marketplace.json parse and agree on the name
+        run: |
+          name=$(jq -er .name .claude-plugin/plugin.json)
+          [ "$(jq -er '.plugins[0].name' .claude-plugin/marketplace.json)" = "$name" ]
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: claude plugin validate
+        run: npx -y @anthropic-ai/claude-code plugin validate .
