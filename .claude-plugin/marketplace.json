@@ -1,0 +1,14 @@
+{
+  "name": "sprint-pilot",
+  "description": "The sprint-pilot plugin",
+  "owner": {
+    "name": "Mostafa Shawkey"
+  },
+  "plugins": [
+    {
+      "name": "sprint-pilot",
+      "source": "./",
+      "description": "From the items assigned to you this sprint to ready chats: reads your tracker, checks stories for gaps, plans branches and order, and opens each unit as its own chat on its own branch"
+    }
+  ]
+}

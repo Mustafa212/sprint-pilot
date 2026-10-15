@@ -1,0 +1,27 @@
+# Pushing a vX.Y.Z tag publishes a GitHub release with that version's CHANGELOG.md section.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The tag matches plugin.json
+        run: |
+          version=$(jq -r .version .claude-plugin/plugin.json)
+          [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "Tag $GITHUB_REF_NAME doesn't match plugin.json version $version"; exit 1; }
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v h="## ${GITHUB_REF_NAME#v} " 'index($0, h) == 1 {on = 1; next} on && /^## / {exit} on' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "CHANGELOG.md has no section for $GITHUB_REF_NAME"; exit 1; }
+      - name: Create the release (a release that already exists is kept)
+        run: gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
