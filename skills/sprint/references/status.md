@@ -3,28 +3,43 @@
 *sprint-pilot reference. Read it for `/sprint status` and `/sprint cleanup`.*
 
 ## /sprint status
-For each unit the run file shows as launched:
-1. In its worktree, read `.ai-session/STATE.md` and the story file it points to: `Phase`, `NEXT`,
-   `Waiting`, `PR` and `Last updated` (senior-dev writes them). No state file: phase "—".
-2. Git: commits ahead of the base (`git rev-list --count origin/<base>..HEAD`), and uncommitted
-   changes (`git status --porcelain`).
-3. Host: the pull request's state when `PR` names one (open, merged, closed), with the run file's
-   `Source:` server for Azure Repos.
+For each unit in the run file:
+1. **Its run** (launched units): in its worktree, read every `.ai-session/senior-dev/*.md` (senior-dev
+   keeps one per story, and a finished run leaves `STATE.md`'s index, so read the folder, not the
+   index): `Phase`, `NEXT`, `Waiting`, `PR` and `Last updated`. No such file (another workflow, or
+   not started): phase "—".
+2. **Git:** commits ahead of its base (`git rev-list --count origin/<base>..HEAD`) and uncommitted
+   changes (`git status --porcelain`, yes or no).
+3. **Its pull request:** the run file's `PR`, else the run's `PR` line, else the host adapter's
+   find_pr by the unit's branch (this covers every workflow). Write a URL found this way into the
+   run file. Then its state (open, merged, abandoned) from the host adapter, with the server for the
+   remote's org. Merged: set the unit's status to `done`.
 
-Show:
+Show every unit, queued and stacked ones included:
 
-| Unit | Phase | Waiting on you? | Last update | Commits | PR |
-|---|---|---|---|---|---|
+| Unit | Status | Phase | Waiting on you? | Last update | Commits | Uncommitted | PR |
+|---|---|---|---|---|---|---|---|
 
-Then, if a unit's pull request is open or merged and the queue holds a unit whose dependencies are
-met, offer to launch it (`references/launch.md`). A unit that depends on another one: ask whether
-to start from the base or from that unit's branch.
-
-A unit whose chat was closed: offer to open a new chat on its worktree (the launch script, same
-first message); senior-dev resumes from its `NEXT`.
+Then offer what's ready, after the user's yes for each:
+- **A queued unit** whose dependencies are all done (merged): launch it (`references/launch.md`,
+  from its saved brief).
+- **A stacked unit** whose dependency merged: in its worktree, `git fetch origin`, then
+  `git rebase --onto origin/<base> <the Stacked on commit>`, and set the brief's `Base` and
+  `Stacked on` accordingly. A conflict: stop, leave the rebase for the unit's chat, and say so.
+  Never force-push without the user's yes.
+- **A launched unit** with no update for a day and `Waiting: no`: its chat may be closed; offer to
+  open a new chat on its worktree (the launch script, same workflow). senior-dev resumes from its
+  `NEXT`.
 
 ## /sprint cleanup
-List the units whose pull request is merged. After the user's yes, for each: `git worktree remove
-<path>` (it refuses when there are uncommitted changes: report it, never force), then
-`git branch -d <branch>` (it refuses when unmerged: report it, never force). Mark them cleaned in
-the run file. Never delete a remote branch.
+List the units whose pull request is merged. Ask once, naming for each unit what will happen,
+including that its `.ai-session/` (state, delivery log, evidence) is archived first. After the yes,
+for each:
+1. Copy `<worktree>/.ai-session/` to `runs/<project>-<sprint>/archive/<unit>/` (attachments
+   excluded). `git worktree remove` deletes ignored files, so this copy is the only one left.
+2. `git worktree remove <path>`. It refuses when there are uncommitted changes: report it, never
+   force.
+3. `git branch -d <branch>`. A squash merge makes it refuse even though the host says merged: then,
+   because the host confirmed the merge, ask once more and use `git branch -D <branch>` for that
+   branch only.
+4. Mark the unit `cleaned` in the run file. Never delete a remote branch.

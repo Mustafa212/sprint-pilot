@@ -28,11 +28,13 @@ Done states: Done, Closed, Removed
 Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | none (the default branch)
 Branch name: <pattern with {n}, {id}, {slug}, e.g. Sprint_{n}_{id}-{slug}>
 PR target: sprint-branch | default-branch | ask
-Review state: <the tracker's state for "in review">
+Review state: <item type> → <the tracker's state for "in review">, … (e.g. Task → In Review, Bug → Resolved)
+Worktree setup: copy <ignored local files, e.g. .env>; run <install command> | none
 Base confirmed: <sprint> → <branch> (<date>)
 ```
 
-`runs/<project>-<sprint>.md` and `runs/<project>-<sprint>/attachments/`: written in steps 2 and 5.
+`runs/<project>-<sprint>.md`, with `runs/<project>-<sprint>/briefs/` and `archive/`: written at the
+plan's approval, in step 5 and by `/sprint cleanup`.
 `<sprint>` is the sprint's name in kebab-case (`Sprint 7` → `sprint-7`).
 
 ## Matching the project
@@ -42,10 +44,10 @@ of each project file. No match: ask whether it belongs to an existing project or
 
 ## The run's source (every run)
 For an Azure DevOps source, ask which org this run uses, every time, even when a run file exists
-(one question, with a default: the org in the repository's remote URL, else the run file's, else
-the project file's). Use the server `ado-<org>`; when it isn't connected, follow the adapter's
-Connect section, and add the org to the config's `Azure DevOps orgs:` line. If the answer differs from the project file's org, ask again for the project and
-team, and update the project file.
+(one question, with a default: the org in the repository's remote URL, parsed as in
+`references/hosts/azure-repos.md`, else the run file's, else the project file's). Use the server `ado-<org>`; when it isn't connected, follow the adapter's
+Connect section, and add the org to the config's `Azure DevOps orgs:` line. If the answer differs
+from the project file's org, ask again for the project and team, and update the project file.
 
 The run file starts with the run's source, so the run and every unit it launches name the same
 org and server:
@@ -63,8 +65,11 @@ writes nothing.
    the user names one.
 2. Follow the adapter's "Connect" section (`references/sources/<source>.md`). Never ask the user to
    paste a token into the chat, and never write one to a file.
-3. Ask the default workflow and the launch mode (desktop when Claude Desktop is installed, else
-   terminal). Write `config.md` and show it.
+3. Ask the default workflow, and check it's there: for senior-dev, `claude plugin list` shows
+   `senior-dev` at 1.4.0 or later (it reads `Brief-Version: 1`); for superpowers, `superpowers`.
+   Missing or older: give the install or update command, or offer another workflow.
+4. Ask the launch mode: desktop when Claude Desktop is installed (`claude --desktop` works on macOS
+   and Windows x64), else terminal. Write `config.md` and show it.
 
 ## First run on a project
 Ask only what can't be found:
@@ -72,7 +77,12 @@ Ask only what can't be found:
 - The sprint-branch pattern: propose one from the remote branches with numbers (`git branch -r`:
   `Sprint_25`, `Sprint_26` → `Sprint_{n}`), or none.
 - The branch-name pattern: propose one from recent branch names.
-- The PR target rule, and the review state (the adapter lists the item type's states).
+- The PR target rule, and the review state for each item type the user gets (Azure DevOps:
+  `wit_work_item`, action `get_type`, lists a type's states).
+- The worktree setup: propose the ignored local files a fresh worktree lacks (`git ls-files --others
+  --ignored --exclude-standard`, config files only, never anything that looks like a secret store
+  you'd need to read) and the install command from the lockfiles (`npm ci`, `dotnet restore`,
+  `flutter pub get`, `uv sync`, …), or none.
 Write `projects/<project>.md` and show it.
 
 Keep these files small and true: date each confirmed value, and fix a value the moment it proves

@@ -19,9 +19,13 @@ claude plugin marketplace add Mustafa212/sprint-pilot
 claude plugin install sprint-pilot@sprint-pilot
 ```
 
-Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.3.2 or later, which
-reads the launch brief each unit starts with (including which tracker server to use), reports its
-progress to `/sprint status`, and asks to open the pull request at the end.
+Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.4.0 or later, which
+reads the launch brief each unit starts with (the story, the unit's scope, the tracker server and
+the review state), reports its progress to `/sprint status`, and asks to open the pull request at
+the end. `/sprint setup` checks it's installed.
+
+Claude Desktop launches need `claude --desktop` (macOS, or Windows x64); elsewhere units open in a
+terminal.
 
 ## Use
 
@@ -63,8 +67,14 @@ for each `ado-<org>` server (prefix every tool with `mcp__ado-<org>__`):
 
 | Rule | Tools | Why |
 |---|---|---|
-| deny | `wit_work_item_comment_write`, `repo_pull_request_thread_write`, `repo_create_branch` | nothing here needs them |
+| deny | `wit_work_item_comment_write`, `repo_pull_request_thread_write`, `repo_create_branch`, `work_iteration_write`, `work_capacity_write` | nothing here needs them |
 | ask | `wit_work_item_write`, `wit_work_item_link_write`, `repo_pull_request_write` | the unit's workflow opens the pull request, links it and sets the review state, after your yes |
+
+### Safety
+
+Stories, comments and attachments are written by many people, so every agent here treats them as
+data, never as instructions, and reports anything that reads like an instruction. The permission
+rules above are the real barrier: they apply to every agent and every unit's chat.
 
 ## Your data stays local
 
@@ -72,16 +82,20 @@ for each `ado-<org>` server (prefix every tool with `mcp__ado-<org>__`):
 ~/.claude/sprint-pilot/          (or $SPRINT_PILOT_HOME)
   config.md                      sources, Azure DevOps orgs, default workflow, max parallel units, scout model, launch mode
   projects/<project>.md          repositories, tracker coordinates, branch patterns, PR target, review state
-  runs/<project>-<sprint>.md     each run's source, units, branches, worktrees and queue
+  runs/<project>-<sprint>.md     each run's source, units, branches, worktrees, pull requests and queue
+  runs/<project>-<sprint>/       the units' briefs, and the archive /sprint cleanup keeps of each unit's .ai-session/
 ```
 
 Worktrees sit beside each repository (`<repo>.worktrees/<branch>`), never inside it.
 
 ## Development
 
-Scripts have self-tests (`scripts/test/`), run in CI on Linux and Windows. A fixture
-(`tests/fixture/`) gives a repository and a sprint file for dry runs. Releases: bump `version` in
-`.claude-plugin/plugin.json`, head the CHANGELOG entry with it, merge, and push a `vX.Y.Z` tag.
+Scripts have self-tests (`scripts/test/`), run in CI on Linux, macOS and Windows (on Windows also
+from Git Bash, as Claude's Bash tool runs them). `tests/contract/check.sh <senior-dev checkout>`
+checks that every launch-brief field is one senior-dev reads, and every state field `/sprint status`
+reads is one it writes. A fixture (`tests/fixture/`) gives a repository and a sprint file for dry
+runs. Releases: bump `version` in `.claude-plugin/plugin.json`, head the CHANGELOG entry with it,
+merge, and push a `vX.Y.Z` tag.
 
 ## License
 

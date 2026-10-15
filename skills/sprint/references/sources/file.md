@@ -25,4 +25,5 @@ Nothing to connect. Check the file exists and has a `Me:` line and a `# Sprint <
 | sprint | The `# Sprint <n>` heading: name `Sprint <n>`, number n. |
 | my_items | Every item whose `Assigned` is whoami and whose `State` isn't Done, Closed or Removed. |
 | get_item | The item's section, its parent's and its children's sections, and its links. No attachments. |
-| link_pr, set_state | Not supported: say so and skip. |
+| link | `<path of the file> § <id>` |
+| link_pr, set_state | Not supported: the brief says `Review state: none`, so the unit skips them. |

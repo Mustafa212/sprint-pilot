@@ -3,7 +3,11 @@
 # teammate's in-flight branch on pricing, and a branch name that's already taken.
 # Usage: bash tests/fixture/make-repo.sh <target-folder>
 set -eu
-target="$1"
+target="${1:?usage: make-repo.sh <target-folder>}"
+# Only ever delete an earlier fixture (it has remote.git) or an empty folder.
+if [ -e "$target" ] && [ -n "$(ls -A "$target")" ] && [ ! -d "$target/remote.git" ]; then
+  echo "refusing to delete $target: not empty and not a fixture" >&2; exit 2
+fi
 rm -rf "$target"; mkdir -p "$target"; cd "$target"
 git init -q --bare remote.git
 git init -q -b main shop && cd shop

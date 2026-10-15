@@ -1,4 +1,5 @@
-# Runs the launch script self-tests on Linux and Windows, and checks the plugin manifests.
+# Runs the launch script self-tests on Linux, macOS and Windows, the contract test against
+# senior-dev, and checks the plugin manifests.
 name: ci
 
 on:
@@ -10,10 +11,11 @@ jobs:
   scripts:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      # On Windows this runs in Git Bash, as Claude's Bash tool does, and also calls launch.ps1 from bash.
       - name: launch.sh self-tests
         shell: bash
         run: bash scripts/test/launch_test.sh
@@ -21,6 +23,20 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test/launch_test.ps1
+      - name: the Terminal.app AppleScript compiles
+        if: runner.os == 'macOS'
+        run: |
+          sed -n '/^on run argv$/,/^end run$/p' scripts/launch.sh > /tmp/launch.applescript
+          [ -s /tmp/launch.applescript ] && osacompile -o /tmp/launch.scpt /tmp/launch.applescript
+
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: the launch brief and state fields match senior-dev
+        run: |
+          git clone --depth 1 https://github.com/Mustafa212/senior-dev /tmp/senior-dev
+          bash tests/contract/check.sh /tmp/senior-dev
 
   manifests:
     runs-on: ubuntu-latest
@@ -34,4 +50,4 @@ jobs:
         with:
           node-version: 22
       - name: claude plugin validate
-        run: npx -y @anthropic-ai/claude-code plugin validate .
+        run: npx -y @anthropic-ai/claude-code@2.1.300 plugin validate .
