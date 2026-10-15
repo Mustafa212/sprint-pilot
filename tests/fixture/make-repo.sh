@@ -9,7 +9,7 @@ if [ -e "$target" ] && [ -n "$(ls -A "$target")" ] && [ ! -d "$target/remote.git
   echo "refusing to delete $target: not empty and not a fixture" >&2; exit 2
 fi
 rm -rf "$target"; mkdir -p "$target"; cd "$target"
-git init -q --bare remote.git
+git init -q --bare -b main remote.git
 git init -q -b main shop && cd shop
 git config user.email fixture@example.com && git config user.name "Sam Dev"
 mkdir -p src
