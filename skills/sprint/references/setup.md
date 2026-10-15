@@ -10,7 +10,8 @@ All of this lives in the local data folder (SKILL.md), never in a repository.
 
 ```
 # sprint-pilot — machine config
-Connected sources: <azure-devops (MCP server: <name>)>, …
+Connected sources: azure-devops, file, …
+Azure DevOps orgs: <org> (MCP server: ado-<org>), …
 Default workflow: senior-dev            (senior-dev | superpowers | none)
 Max parallel units: 3
 Scout model: opus                       (opus | sonnet)
@@ -22,7 +23,7 @@ Launch: desktop                         (desktop | terminal)
 ```
 # <project>
 Repos: <path> (<remote URL>)[, …]
-Source: azure-devops (org: <org>, project: <project>, team: <team>) | file (<path>)
+Source: azure-devops (org: <last org used>, project: <project>, team: <team>) | file (<path>)
 Done states: Done, Closed, Removed
 Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | none (the default branch)
 Branch name: <pattern with {n}, {id}, {slug}, e.g. Sprint_{n}_{id}-{slug}>
@@ -38,6 +39,23 @@ Base confirmed: <sprint> → <branch> (<date>)
 Match the chat's repository (its path, or `git remote get-url origin`) against the `Repos:` line
 of each project file. No match: ask whether it belongs to an existing project or is a new one
 (name: the remote's repository name in kebab-case).
+
+## The run's source (every run)
+For an Azure DevOps source, ask which org this run uses, every time, even when a run file exists
+(one question, with a default: the org in the repository's remote URL, else the run file's, else
+the project file's). Use the server `ado-<org>`; when it isn't connected, follow the adapter's
+Connect section, and add the org to the config's `Azure DevOps orgs:` line. If the answer differs from the project file's org, ask again for the project and
+team, and update the project file.
+
+The run file starts with the run's source, so the run and every unit it launches name the same
+org and server:
+
+```
+Source: azure-devops (org: <org>, MCP server: ado-<org>, project: <project>, team: <team>)
+```
+
+For a file source: `Source: file (<path>)`. A dry run shows the question as "(would ask)" and
+writes nothing.
 
 ## First run on this machine
 1. Ask where the user's items live (AskUserQuestion): Azure DevOps, or a file (to try sprint-pilot

@@ -43,8 +43,9 @@ This plugin's folder: `${CLAUDE_PLUGIN_ROOT}`. Local data: `$SPRINT_PILOT_HOME` 
 
 ## Step 1 — Context
 Read the local `config.md` and the project's `projects/<project>.md` (matching and first run:
-`references/setup.md`). No config: run setup first. Read the run file `runs/<project>-<sprint>.md`
-when it exists: its launched units are never launched again.
+`references/setup.md`). No config: run setup first. Then the run's source: for Azure DevOps, ask
+which org this run uses, every run (`references/setup.md`, "The run's source"). Read the run file
+`runs/<project>-<sprint>.md` when it exists: its launched units are never launched again.
 
 ## Step 2 — Your items
 With the project's source adapter: whoami, the sprint, my_items, then get_item for each (parent
