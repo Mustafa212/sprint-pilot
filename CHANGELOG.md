@@ -3,6 +3,38 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.1.0 — 2026-10-16 (scout, plan and brief improvements from comparing similar skills)
+Found by comparing sprint-pilot with other open sprint, planning and hand-off skills and with
+Claude Code's own docs; all wording is ours.
+- Scout: maps the touched areas first, then looks for each answer in the code before calling
+  something a gap (what the code settles is listed with `file:line`, to confirm). A gap now also
+  covers what the story assumes but the code lacks or contradicts. Why: the checklist flagged
+  things the codebase already settles, and missed stories built on fields or rules that aren't there.
+- Scout: the gaps open with the acceptance criteria as written; missing or unobservable criteria are
+  a gap, an inferred one is a gap to confirm, and a new line records what the story puts out of
+  scope. Why: missing criteria are the most common costly gap, and weren't on the checklist.
+- Gaps say whether they block the start and who decides; a unit with a blocking gap is planned as
+  `held (gap #n)` (the user can override it), and `/sprint status` offers it once the gap is
+  answered. Why: the plan couldn't show which units shouldn't start yet, or which questions belong
+  to someone other than the product owner.
+- Touched areas gain a "shared registration" kind (DI setup, routes, menus, permission seeds,
+  translation files, manifests and lockfiles, shared fixtures); two units adding to one is a minor
+  conflict, named in both briefs and never a reason on its own to queue. Why: in layered apps most
+  conflicts come from files every feature appends to, and they showed no overlap.
+- Planning checks the dependencies for a cycle before ordering, and asks which link to drop or
+  whether to merge the units. Why: a cycle left both units queued with nothing to start them.
+- A saved brief is refreshed before a later launch: the items are fetched again (changed story
+  sections are replaced), a `## Merged before this unit` section lists what merged and which of its
+  files changed on the base, and the gaps carry their plan date. Why: a queued unit can start days
+  later, after the story or the base changed.
+- The brief gains `## Shared with other units`, with how to behave there (change only what the story
+  needs; stop and ask before more). Why: `Conflicts:` named the areas but gave no rule. The brief
+  stays at `Brief-Version: 1`: no field changed meaning, and the new content is headings and bullets.
+- The skill's description names Azure DevOps and worktrees, says what it's not for, and adds an
+  `argument-hint`. The dry-run row, the org question and the exit-code text are shorter (the
+  details stay in the references), and the repeated "never relaunch a launched unit" row is gone.
+  The Windows exit 3 no longer promises a printed command (`claude` isn't on PATH there).
+
 ## 1.0.2 — 2026-10-16 (cleanup keeps unsaved commits)
 - `/sprint cleanup` first checks each merged unit's branch for commits saved nowhere else (ahead of
   its remote branch, or after the pull request's last source commit when the remote branch is

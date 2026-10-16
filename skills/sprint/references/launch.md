@@ -4,9 +4,20 @@
 
 ## At approval
 Before touching any repository, write the run file with every unit of the approved plan (status
-`planned`, `queued` or `stacked`) and each unit's brief to `runs/<project>-<sprint>/briefs/<unit>.md`
-(format below). Both live in the local data folder. A unit launched later (from `/sprint status`, in
-another session) uses its saved brief.
+`planned`, `queued`, `stacked` or `held`) and each unit's brief to
+`runs/<project>-<sprint>/briefs/<unit>.md` (format below). Both live in the local data folder.
+
+## Before launching a saved brief
+A unit launched later (from `/sprint status`, or in another session) starts from its saved brief,
+which may be days old. Update it first:
+1. Run get_item again for its items, with the brief's `Source:`. If the story, its tasks or its
+   comments changed (the product owner may have answered a gap there), replace the two story
+   sections with the new text and date, and tell the user what changed. The gaps stay as planned;
+   their heading dates them.
+2. Add `## Merged before this unit`: a bullet for each pull request it waited for (link and title),
+   and one for the files changed on the base since planning, within its touched areas
+   (`git diff --name-only <planned commit>...origin/<base>`, the commit in the touched-areas
+   heading).
 
 ## For each unit that starts now, in plan order, one at a time
 1. **Worktree.** In the unit's repository: `git fetch origin`, then
@@ -32,15 +43,14 @@ another session) uses its saved brief.
 
    Then, by exit code:
    - **0:** record the unit as launched in the run file now, before asking anything. Desktop mode
-     put the first message on the clipboard and opened a Claude Desktop chat on the worktree; ask
-     (AskUserQuestion): "Pasted — open the next" / "It didn't open" / "Stop here". "It didn't open":
-     offer terminal mode for this unit. "Stop here": the remaining units that were to start now
-     become queued.
-   - **3:** no terminal could be opened (or, on Windows, `claude` isn't on PATH). Show the printed
-     command for the user to run in a new terminal; record the unit as launched once they say it's
-     running.
-   - **4:** no Claude Desktop on this system: offer terminal mode.
-   - **2:** a bad argument; fix it and run again.
+     (the first message is on the clipboard): ask (AskUserQuestion) "Pasted — open the next" / "It
+     didn't open" (offer terminal mode for this unit) / "Stop here" (the units still to start now
+     become queued).
+   - **3:** no terminal could be opened: show the command it printed, for the user to run in a new
+     terminal; record the unit as launched once they say it's running. On Windows, 3 means `claude`
+     isn't on PATH, and there is no command to show.
+   - **2 or 4:** the script's message says what's wrong: fix the argument, or (4) offer terminal
+     mode.
 
 ## Launch brief format
 
@@ -71,15 +81,29 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 <id — title — description, for each task in Work items>
 </story>
 
-## Gaps found by the scout (a starting point: re-check them; they are not findings)
-| # | Gap | Story line | Recommendation |
-|---|---|---|---|
+## Gaps found by the scout, from <plan date> (a starting point: re-check them; they are not findings)
+| # | Gap | Story line | Blocks start? | Who decides | Recommendation |
+|---|---|---|---|---|---|
+- Settled by the code: <question — answer (`file:line`); …, or none>
+- Out of scope (per the story): <…, or not stated>
 
-## Touched areas (the scout's estimate)
+## Touched areas (the scout's estimate, on origin/<base> @ <commit at planning>)
 | Area | Kind | Confidence | Evidence |
 |---|---|---|---|
+
+## Shared with other units
+- <area>: <unit (branch), or a teammate's branch (author)>; … — or "none", and drop the two rules
+- In these areas change only what the story needs: no reformatting, renames or moves; add a new
+  signature rather than change an existing one.
+- If you need more there, stop and ask the user, naming the other unit.
+
+## Merged before this unit (only in a brief launched later)
+- <pull request link> — <title>
+- Changed on <base> since planning, in this unit's areas: <files, or none>
 ```
 
+- `Shared with other units`: every area in `Conflicts:`, each shared registration the plan named,
+  and each in-flight branch the plan warned about in this unit's areas.
 - `Review state`: the project file's review state for each item's type. Move only this unit's work
   items; move the story too only when this unit owns all of it (no other unit or teammate has tasks
   under it). File source: `none`.
@@ -96,8 +120,8 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 Source: azure-devops (org: <org>, MCP server: ado-<org>, project: <project>, team: <team>) | file (<path>)
 | Unit | Story | Repo | Branch ← base | Worktree | Workflow | Status | PR | Launched |
 |---|---|---|---|---|---|---|---|---|
-Queue: <unit> (waits for <unit>), …
+Queue: <unit> (waits for <unit> | held: gap #n), …
 ```
 
-`Status`: planned, queued, stacked, launched, done (pull request merged), or cleaned. `PR`: the pull
-request's URL once `/sprint status` finds it.
+`Status`: planned, queued, stacked, held, launched, done (pull request merged), or cleaned. `PR`:
+the pull request's URL once `/sprint status` finds it.

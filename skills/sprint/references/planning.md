@@ -1,6 +1,11 @@
 # Planning
 
-*sprint-pilot reference. Read it in steps 3 and 4.*
+*sprint-pilot reference. Read it in steps 3 and 4, and for a dry run.*
+
+## Dry run
+`/sprint plan --dry-run` asks nothing: it shows each question as "(would ask)" with its default. It
+fetches (which only updates the remote-tracking refs) and creates nothing else: no branch,
+worktree, file, download or run file. It ends at the plan.
 
 ## Repository state (step 3, first)
 For each repository, `git fetch --prune origin`, then:
@@ -67,8 +72,9 @@ Compare every pair of units, and every unit with the in-flight branches:
 
 | Signal | Means |
 |---|---|
-| The same file, table, migration or endpoint in both units' touched areas (medium or high confidence) | conflict risk |
+| The same file, table, migration or endpoint in both units' touched areas (medium or high confidence), other than a shared registration | conflict risk |
 | Both units add migrations, or change the same database schema | conflict risk (they share one dev database) |
+| Both units add to the same shared registration (DI setup, routes, menus, translation files, …) | minor conflict: name it in both briefs (`## Shared with other units`); never a reason on its own to queue |
 | A tracker dependency between their items (blocked-by, blocks, predecessor, successor) | dependency |
 | An in-flight branch or pull request changes a file in a unit's touched areas | warning: name the branch and its author |
 
@@ -83,21 +89,27 @@ For a dependency, the user may instead stack it: it starts now from the other un
 project's rule.
 
 ## Order and workflow
-Start now: units with no dependency, up to the max parallel units minus the units the run file shows
-as launched and not done, larger first. The rest queue in dependency order. Workflow: the config's
-default for every unit; ask once per run whether to keep it, and accept changes per row. PR target:
-from the project's rule; for `ask`, ask once here.
+Before ordering, look for a cycle in the dependencies (the tracker's and the scouts' together). If
+you find one, show it and ask which link to drop, or whether to merge those units into one.
+
+A unit with a gap that blocks the start defaults to `held (gap #n)`; the user can override it.
+Start now: units with no dependency and not held, up to the max parallel units minus the units the
+run file shows as launched and not done, larger first. The rest queue in dependency order. Workflow:
+the config's default for every unit; ask once per run whether to keep it, and accept changes per
+row. PR target: from the project's rule; for `ask`, ask once here.
 
 ## The plan
 Show, in this order:
-1. **Gaps per story:** the scouts' tables with recommendations. They go to the product owner, or
-   into each unit's Phase 1.
+1. **Gaps per story:** the scouts' tables with recommendations, what the code settles, and what
+   the story leaves out. Each gap goes to whoever its scout named under `Who decides`, or into the
+   unit's Phase 1.
 2. **The plan table:**
 
    | Unit | Story / tasks | Repo | Branch ← base | Scope | Gaps | Depends on | Conflicts / warnings | Workflow | Start |
    |---|---|---|---|---|---|---|---|---|---|
 
-   `Start`: now, queued (behind <unit>), stacked (on <unit>), or launched (from the run file).
+   `Start`: now, queued (behind <unit>), stacked (on <unit>), held (gap #n), or launched (from the
+   run file).
 3. One line: "Approve, or tell me what to change."
 
 Then stop. Nothing is created before the user approves.
