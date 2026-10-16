@@ -45,7 +45,7 @@ line yet.) Without Claude Desktop, units open in terminal tabs and start on thei
 
 | Source | Status |
 |---|---|
-| Azure DevOps Boards (+ Azure Repos) | untested on a live sprint |
+| Azure DevOps Boards (+ Azure Repos) | dry run tested on a live sprint; launch not yet |
 | A Markdown file (try it without a tracker) | tested |
 | GitHub Issues, Jira, Notion, Linear | planned |
 
@@ -61,6 +61,9 @@ the run file; each unit's launch brief carries it, so the unit's workflow uses t
 ```bash
 claude mcp add ado-<org> -s user -- npx -y @azure-devops/mcp@2.10.0 <org> -d core work work-items repositories
 ```
+
+If the server times out when a session starts (`npx` can be slow, especially on Windows), set
+`MCP_TIMEOUT=120000` in your environment (Windows: `setx MCP_TIMEOUT 120000`) and restart.
 
 sprint-pilot itself writes nothing to Azure DevOps. Recommended rules in `~/.claude/settings.json`
 for each `ado-<org>` server (prefix every tool with `mcp__ado-<org>__`):
