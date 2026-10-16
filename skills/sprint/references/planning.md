@@ -7,9 +7,11 @@ For each repository, `git fetch --prune origin`, then:
 1. **Default branch:** `git symbolic-ref --short refs/remotes/origin/HEAD`; when that fails,
    `git ls-remote --symref origin HEAD`.
 2. **Base:** the sprint-branch pattern filled with this sprint's n (from the tracker), when that
-   branch exists on the remote; else the highest n below it that exists; no pattern or no match:
-   the default branch. If the project file has no `Base confirmed:` for this sprint, ask once
-   ("Base for <sprint>: <branch>?") and record the answer.
+   branch exists on the remote; else the highest n below it that exists. One branch instead of a
+   pattern: that branch. No pattern or no match: the default branch, unless a long-lived branch is
+   far ahead of it (as in `references/setup.md`): then propose that branch, and say why. If the
+   project file has no `Base confirmed:` for this sprint, ask once ("Base for <sprint>: <branch>?")
+   and record the answer.
 3. **In flight:** branches, with git on any host:
    `git for-each-ref refs/remotes/origin --sort=-committerdate --format='%(refname:short)|%(committerdate:unix)|%(authorname)'`,
    keeping those with commits in the last 14 days, except `origin/HEAD`, the default branch, every

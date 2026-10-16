@@ -25,7 +25,7 @@ Launch: desktop                         (desktop | terminal)
 Repos: <path> (<remote URL>)[, …]
 Source: azure-devops (org: <last org used>, project: <project>, team: <team>) | file (<path>)
 Done states: Done, Closed, Removed
-Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | none (the default branch)
+Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | <one branch, e.g. dev> | none (the default branch)
 Branch name: <pattern with {n}, {id}, {slug}, e.g. Sprint_{n}_{id}-{slug}>
 PR target: sprint-branch | default-branch | ask
 Review state: <item type> → <the tracker's state for "in review">, … (e.g. Task → In Review, Bug → Resolved)
@@ -75,7 +75,10 @@ writes nothing.
 Ask only what can't be found:
 - The source's coordinates (the adapter says which: for Azure DevOps the project and team).
 - The sprint-branch pattern: propose one from the remote branches with numbers (`git branch -r`:
-  `Sprint_25`, `Sprint_26` → `Sprint_{n}`), or none.
+  `Sprint_25`, `Sprint_26` → `Sprint_{n}`); with none, the one long-lived branch the work lands on
+  when the default branch lags far behind it (`git rev-list --count origin/<default>..origin/<branch>`
+  in the hundreds, and the default branch untouched for months: propose that branch, for example
+  `dev`); else none.
 - The branch-name pattern: propose one from recent branch names.
 - The PR target rule, and the review state for each item type the user gets (Azure DevOps:
   `wit_work_item`, action `get_type`, lists a type's states).

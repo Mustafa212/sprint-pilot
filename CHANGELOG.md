@@ -3,6 +3,17 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.0.1 — 2026-10-16 (fixes from the first live Azure DevOps dry run)
+- Azure DevOps Connect: a configured server that fails or times out at session start needs a longer
+  MCP startup timeout (`MCP_TIMEOUT=120000`); the README says so too. Why: `npx` took longer than
+  the 30-second default on Windows, and the run stopped at step 2.
+- The sprint step warns when Azure's "current" iteration has already ended, and asks before going
+  on. Why: Azure keeps returning the last iteration when no later one exists.
+- Setup and planning propose the branch the work lands on as the base when the default branch lags
+  far behind it (a `Sprint branch:` line can now name one branch). Why: proposing a default branch
+  hundreds of commits behind `dev` would start units on stale code.
+- README: the Azure DevOps source is dry-run tested on a live sprint; launch isn't yet.
+
 ## 1.0.0 — 2026-10-15 (first release: Azure DevOps and file sources)
 - `/sprint`: reads the items assigned to you in the current sprint, checks the repositories (base,
   in-flight branches and pull requests), runs a read-only scout per story (gaps with
