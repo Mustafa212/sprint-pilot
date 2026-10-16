@@ -32,14 +32,23 @@ Then offer what's ready, after the user's yes for each:
   `NEXT`.
 
 ## /sprint cleanup
-List the units whose pull request is merged. Ask once, naming for each unit what will happen,
-including that its `.ai-session/` (state, delivery log, evidence) is archived first. After the yes,
-for each:
+List the units whose pull request is merged. First check each one for commits saved nowhere else
+(a merged PR proves only that the commits it had landed):
+- The remote branch still exists: `git rev-list --count origin/<branch>..<branch>`.
+- It was deleted: `git rev-list --count <last source commit>..<branch>`, with the PR's last source
+  commit from the host adapter (Azure Repos: `lastMergeSourceCommit` in pr_state's response).
+
+More than 0: show those commits (`git log --oneline`) and leave that unit out. Can't tell: leave it
+out and say why.
+
+Ask once, naming for each remaining unit what will happen, including that its `.ai-session/`
+(state, delivery log, evidence) is archived first, and that its chat should be closed first. After
+the yes, for each:
 1. Copy `<worktree>/.ai-session/` to `runs/<project>-<sprint>/archive/<unit>/` (attachments
    excluded). `git worktree remove` deletes ignored files, so this copy is the only one left.
 2. `git worktree remove <path>`. It refuses when there are uncommitted changes: report it, never
    force.
 3. `git branch -d <branch>`. A squash merge makes it refuse even though the host says merged: then,
-   because the host confirmed the merge, ask once more and use `git branch -D <branch>` for that
-   branch only.
+   because the host confirmed the merge and the check above found no unsaved commits, ask once more
+   and use `git branch -D <branch>` for that branch only.
 4. Mark the unit `cleaned` in the run file. Never delete a remote branch.
