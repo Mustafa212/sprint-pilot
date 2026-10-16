@@ -3,6 +3,24 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.2.0 — 2026-10-16 (background sessions; pull request state on the board)
+- **Launch mode `background`** (now the default for a new setup): each unit starts with
+  `claude --bg --name <worktree>` and its first message, so nothing is pasted, and shows in
+  `claude agents`. The run file records each unit's session; `/sprint status` reads its state
+  (`blocked` waits for the user; `failed`, `stopped` or gone isn't running) and offers
+  `claude attach <id>` or a restart. Why: the paste step per unit was the main friction, and the
+  board had to guess from a day without updates. Checked on Windows with `launch.ps1` in a
+  worktree of a trusted repository; a worktree takes its main repository's trust, and an untrusted
+  folder makes the script exit 3 with the command to run in a terminal.
+- **Pull request state on the board** (Azure Repos): draft, merge conflicts, reviewers' votes
+  (waiting for the author, rejected, approved) and required reviewers, read from the pull request;
+  conflicts and "waiting for the author" count as waiting on you. Build and policy results aren't in
+  that response, so they aren't guessed.
+- **Worktrees stay sprint-pilot's own**, beside the repository, not Claude Code's
+  `.claude/worktrees/`, so the plan's branch names and stacking hold. Why: Claude Code's native
+  worktree features apply only to worktrees it creates, and the project's worktree setup already
+  copies the ignored local files.
+
 ## 1.1.0 — 2026-10-16 (scout, plan and brief improvements from comparing similar skills)
 Found by comparing sprint-pilot with other open sprint, planning and hand-off skills and with
 Claude Code's own docs; all wording is ours.

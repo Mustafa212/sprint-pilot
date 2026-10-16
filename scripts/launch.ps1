@@ -1,15 +1,17 @@
 <#
 .SYNOPSIS
-Opens one sprint-pilot unit on Windows: a Claude Desktop chat on a folder (the first message goes
-on the clipboard), or a terminal tab running Claude with that message.
+Opens one sprint-pilot unit on Windows: a background Claude session in a folder (listed in
+`claude agents`), a Claude Desktop chat on it (the first message goes on the clipboard), or a
+terminal tab running Claude with that message.
 The script builds the message from -Workflow, so no caller (Git Bash included) can mangle it.
-Exit: 0 opened; 2 bad arguments; 3 claude not found.
+Exit: 0 opened; 2 bad arguments; 3 claude not found, or the background session didn't start (run
+the printed command in a terminal: an untrusted folder shows its trust prompt there).
 .EXAMPLE
 powershell -NoProfile -ExecutionPolicy Bypass -File launch.ps1 -Dir C:\src\shop.worktrees\sprint-7-101 -Mode desktop -Workflow senior-dev
 #>
 param(
   [Parameter(Mandatory = $true)][string]$Dir,
-  [Parameter(Mandatory = $true)][ValidateSet('desktop', 'terminal')][string]$Mode,
+  [Parameter(Mandatory = $true)][ValidateSet('background', 'desktop', 'terminal')][string]$Mode,
   [Parameter(Mandatory = $true)][ValidateSet('senior-dev', 'superpowers', 'none')][string]$Workflow,
   [switch]$DryRun
 )
@@ -28,6 +30,17 @@ $claude = $env:SP_CLAUDE
 # -CommandType Application: npm puts claude.ps1 beside claude.cmd, and Start-Process can't run a .ps1.
 if (-not $claude) { $found = Get-Command claude -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1; if ($found) { $claude = $found.Source } }
 if (-not $claude) { [Console]::Error.WriteLine('claude is not on PATH'); exit 3 }
+
+if ($Mode -eq 'background') {
+  $name = Split-Path -Leaf $Dir
+  if ($DryRun) { "run: $claude --bg --name $name $Message (in $Dir)"; exit 0 }
+  Push-Location -LiteralPath $Dir
+  & $claude --bg --name $name $Message
+  $code = $LASTEXITCODE
+  Pop-Location
+  if ($code -ne 0) { "Set-Location -LiteralPath '$($Dir -replace "'", "''")'; & '$($claude -replace "'", "''")' --bg --name $name '$Message'"; exit 3 }
+  exit 0
+}
 
 if ($Mode -eq 'desktop') {
   if ($DryRun) { "clipboard: $Message"; "run: $claude --desktop (in $Dir)"; exit 0 }

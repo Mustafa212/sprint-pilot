@@ -44,6 +44,20 @@ check "macOS terminal: osascript fails → exit 3" '[ "$code" -eq 3 ]'
 out=$(SP_OS=Linux TMUX= run --dir "$dir" --mode terminal --workflow senior-dev 2>/dev/null); code=$?
 check "no terminal to open: exit 3 and the command to run" '[ "$code" -eq 3 ] && printf "%s" "$out" | grep -qF "cd "'
 
+out=$(run --dir "$dir" --mode background --workflow senior-dev --dry-run); code=$?
+check "background: dry run names the unit and passes the message" '[ "$code" -eq 0 ] && printf "%s" "$out" | grep -qF "run: claude --bg --name sprint-7-101 $sd (in $dir)"'
+# A stand-in for claude that prints its folder and then its arguments.
+printf '#!/usr/bin/env bash\npwd\nprintf "%%s\\n" "$@"\n' > "$tmp/pwd-claude"; chmod +x "$tmp/pwd-claude"
+out=$(SP_CLAUDE="$tmp/pwd-claude" run --dir "$dir" --mode background --workflow senior-dev); code=$?
+check "background: starts in the worktree with --bg, the unit name and the message as one argument" '[ "$code" -eq 0 ] && [ "$out" = "$(cd "$dir" && pwd)
+--bg
+--name
+sprint-7-101
+$sd" ]'
+printf '#!/usr/bin/env bash\necho "Workspace not trusted." >&2\nexit 1\n' > "$tmp/untrusted-claude"; chmod +x "$tmp/untrusted-claude"
+out=$(SP_CLAUDE="$tmp/untrusted-claude" run --dir "$dir" --mode background --workflow senior-dev 2>/dev/null); code=$?
+check "background: claude refuses → exit 3 and the command to run" '[ "$code" -eq 3 ] && printf "%s" "$out" | grep -qF -- "--bg --name sprint-7-101"'
+
 run --dir "$tmp/missing" --mode desktop --workflow senior-dev --dry-run 2>/dev/null; code=$?
 check "missing folder: exit 2" '[ "$code" -eq 2 ]'
 run --dir "$dir" --mode sideways --workflow senior-dev --dry-run 2>/dev/null; code=$?

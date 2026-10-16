@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Opens one sprint-pilot unit on macOS or Linux: a Claude Desktop chat on a folder (macOS; the
-# first message goes on the clipboard), or a terminal window running Claude with that message.
-# Usage: bash launch.sh --dir <folder> --mode desktop|terminal --workflow senior-dev|superpowers|none [--dry-run]
-# Exit: 0 opened; 2 bad arguments; 3 couldn't open a terminal (run the printed command); 4 no Desktop here.
+# Opens one sprint-pilot unit on macOS or Linux: a background Claude session in a folder (listed in
+# `claude agents`), a Claude Desktop chat on it (macOS; the first message goes on the clipboard), or
+# a terminal window running Claude with that message.
+# Usage: bash launch.sh --dir <folder> --mode background|desktop|terminal --workflow senior-dev|superpowers|none [--dry-run]
+# Exit: 0 opened; 2 bad arguments; 3 couldn't open or start it (run the printed command in a
+# terminal: an untrusted folder shows its trust prompt there); 4 no Desktop here.
 # Test hooks: SP_CLAUDE (claude command), SP_OS (uname), SP_TMUX (pretend to be inside tmux),
 # SP_OSASCRIPT (osascript command).
 set -u
@@ -19,7 +21,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -d "$dir" ] || { echo "folder not found: $dir" >&2; exit 2; }
-case "$mode" in desktop|terminal) ;; *) echo "--mode must be desktop or terminal" >&2; exit 2 ;; esac
+case "$mode" in background|desktop|terminal) ;; *) echo "--mode must be background, desktop or terminal" >&2; exit 2 ;; esac
 case "$workflow" in
   senior-dev) message='/senior-dev .ai-session/launch.md' ;;
   superpowers) message='Use superpowers:brainstorming on .ai-session/launch.md' ;;
@@ -30,6 +32,14 @@ esac
 claude="${SP_CLAUDE:-claude}"
 os="${SP_OS:-$(uname -s)}"
 q() { printf '%q' "$1"; }
+
+if [ "$mode" = background ]; then
+  name="$(basename "$dir")"
+  if [ "$dry" = 1 ]; then echo "run: $claude --bg --name $name $message (in $dir)"; exit 0; fi
+  (cd "$dir" && "$claude" --bg --name "$name" "$message") ||
+    { echo "cd $(q "$dir") && $(q "$claude") --bg --name $(q "$name") $(q "$message")"; exit 3; }
+  exit 0
+fi
 
 if [ "$mode" = desktop ]; then
   [ "$os" = Darwin ] || { echo "desktop mode needs Claude Desktop (macOS or Windows); use --mode terminal" >&2; exit 4; }

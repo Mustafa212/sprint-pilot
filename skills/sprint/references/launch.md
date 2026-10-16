@@ -23,7 +23,9 @@ which may be days old. Update it first:
 1. **Worktree.** In the unit's repository: `git fetch origin`, then
    `git worktree add --no-track -b <branch> "<repo-parent>/<repo-name>.worktrees/<branch-slug>" origin/<base>`
    (`<branch-slug>`: the branch name in lowercase with `/` and `_` turned into `-`; `--no-track` so
-   the branch never pushes to the base). Never inside the repository folder.
+   the branch never pushes to the base). Never inside the repository folder. These are sprint-pilot's
+   own worktrees, not Claude Code's `.claude/worktrees/`, so the plan's branch names and stacking
+   hold; Claude Code still treats each one as trusted when its main repository is.
    - A branch the plan reuses (no commits of its own): `-B` instead of `-b`, which moves it to the
      current base and loses nothing.
    - A stacked unit: start from the other unit's local branch instead of `origin/<base>`, and write
@@ -36,19 +38,21 @@ which may be days old. Update it first:
    the listed files from the main checkout (local config such as `.env`, which git doesn't carry),
    then run the install command. A failure: report it and ask whether to launch anyway.
 4. **Brief.** Copy the unit's saved brief to `.ai-session/launch.md` in the worktree.
-5. **Open the chat** with the launch script and the config's launch mode (`<plugin>` is this
+5. **Start the unit** with the launch script and the config's launch mode (`<plugin>` is this
    plugin's folder, from SKILL.md). The script builds the first message from the workflow:
    - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File "<plugin>/scripts/launch.ps1" -Dir "<worktree>" -Mode <mode> -Workflow <workflow>`
    - macOS and Linux: `bash "<plugin>/scripts/launch.sh" --dir "<worktree>" --mode <mode> --workflow <workflow>`
 
    Then, by exit code:
-   - **0:** record the unit as launched in the run file now, before asking anything. Desktop mode
-     (the first message is on the clipboard): ask (AskUserQuestion) "Pasted — open the next" / "It
-     didn't open" (offer terminal mode for this unit) / "Stop here" (the units still to start now
-     become queued).
-   - **3:** no terminal could be opened: show the command it printed, for the user to run in a new
-     terminal; record the unit as launched once they say it's running. On Windows, 3 means `claude`
-     isn't on PATH, and there is no command to show.
+   - **0:** record the unit as launched in the run file now, before asking anything. Background
+     mode: it printed the session's id; record it in the unit's `Session` column and go on to the next
+     unit. Desktop mode (the first message is on the clipboard): ask (AskUserQuestion) "Pasted — open
+     the next" / "It didn't open" (offer terminal mode for this unit) / "Stop here" (the units still
+     to start now become queued).
+   - **3:** it couldn't start: show the command it printed, for the user to run in a new terminal
+     (in background mode the usual cause is a repository not trusted yet, and a terminal shows the
+     trust prompt); record the unit as launched once they say it's running. On Windows in desktop or
+     terminal mode, 3 means `claude` isn't on PATH, and there is no command to show.
    - **2 or 4:** the script's message says what's wrong: fix the argument, or (4) offer terminal
      mode.
 
@@ -118,10 +122,11 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 ```
 # <sprint> — <project> (started <date>)
 Source: azure-devops (org: <org>, MCP server: ado-<org>, project: <project>, team: <team>) | file (<path>)
-| Unit | Story | Repo | Branch ← base | Worktree | Workflow | Status | PR | Launched |
-|---|---|---|---|---|---|---|---|---|
+| Unit | Story | Repo | Branch ← base | Worktree | Workflow | Status | PR | Launched | Session |
+|---|---|---|---|---|---|---|---|---|---|
 Queue: <unit> (waits for <unit> | held: gap #n), …
 ```
 
 `Status`: planned, queued, stacked, held, launched, done (pull request merged), or cleaned. `PR`:
-the pull request's URL once `/sprint status` finds it.
+the pull request's URL once `/sprint status` finds it. `Session`: the background session's id
+(background mode), else empty.
