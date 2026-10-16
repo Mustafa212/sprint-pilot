@@ -15,7 +15,7 @@ For each unit in the run file:
    run file. Then its state (open, merged, abandoned) from the host adapter, with the server for the
    remote's org. Merged: set the unit's status to `done`.
 
-Show every unit, queued and stacked ones included:
+Show every unit, queued, stacked and held ones included:
 
 | Unit | Status | Phase | Waiting on you? | Last update | Commits | Uncommitted | PR |
 |---|---|---|---|---|---|---|---|
@@ -23,6 +23,8 @@ Show every unit, queued and stacked ones included:
 Then offer what's ready, after the user's yes for each:
 - **A queued unit** whose dependencies are all done (merged): launch it (`references/launch.md`,
   from its saved brief).
+- **A held unit:** ask whether its blocking gap is answered (in the tracker, or by the user). Yes:
+  launch it the same way, once every unit it depends on is merged.
 - **A stacked unit** whose dependency merged: in its worktree, `git fetch origin`, then
   `git rebase --onto origin/<base> <the Stacked on commit>`, and set the brief's `Base` and
   `Stacked on` accordingly. A conflict: stop, leave the rebase for the unit's chat, and say so.
