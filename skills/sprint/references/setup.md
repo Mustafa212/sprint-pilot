@@ -15,7 +15,7 @@ Azure DevOps orgs: <org> (MCP server: ado-<org>), …
 Default workflow: senior-dev            (senior-dev | superpowers | none)
 Max parallel units: 3
 Scout model: opus                       (opus | sonnet)
-Launch: desktop                         (desktop | terminal)
+Launch: background                      (background | desktop | terminal)
 ```
 
 `projects/<project>.md`:
@@ -68,8 +68,17 @@ writes nothing.
 3. Ask the default workflow, and check it's there: for senior-dev, `claude plugin list` shows
    `senior-dev` at 1.4.0 or later (it reads `Brief-Version: 1`); for superpowers, `superpowers`.
    Missing or older: give the install or update command, or offer another workflow.
-4. Ask the launch mode: desktop when Claude Desktop is installed (`claude --desktop` works on macOS
-   and Windows x64), else terminal. Write `config.md` and show it.
+4. Ask the launch mode:
+   - **background** (recommended): each unit runs as a background session (`claude --bg`), started
+     with its first message (nothing to paste) and listed in `claude agents`, where the user sees
+     which units wait for them and opens one with `claude attach <id>`. The repository must be
+     trusted: the user has run `claude` in it once and accepted the prompt (a worktree takes its
+     main repository's trust).
+   - **desktop**: one Claude Desktop chat per unit (`claude --desktop` works on macOS and Windows
+     x64); the first message goes on the clipboard to paste.
+   - **terminal**: one terminal tab per unit.
+
+   Write `config.md` and show it.
 
 ## First run on a project
 Ask only what can't be found:

@@ -5,7 +5,7 @@ per unit of work, each on its own branch:
 
 ```
 your tracker → your items → gaps per story → a plan (branches, order, conflicts) → your OK
-   → one worktree + one Claude Desktop chat per unit, running your workflow (senior-dev by default)
+   → one worktree + one Claude session per unit, running your workflow (senior-dev by default)
    → /sprint status → pull requests (asked for at the end of each unit) → /sprint cleanup
 ```
 
@@ -19,13 +19,14 @@ claude plugin marketplace add Mustafa212/sprint-pilot
 claude plugin install sprint-pilot@sprint-pilot
 ```
 
-Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.4.0 or later, which
+Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.6.0 or later, which
 reads the launch brief each unit starts with (the story, the unit's scope, the tracker server and
 the review state), reports its progress to `/sprint status`, and asks to open the pull request at
 the end. `/sprint setup` checks it's installed.
 
-Claude Desktop launches need `claude --desktop` (macOS, or Windows x64); elsewhere units open in a
-terminal.
+Background launches (the default) need a Claude Code version with `claude --bg` and agent view, and
+a repository you have trusted (run `claude` in it once). Claude Desktop launches need
+`claude --desktop` (macOS, or Windows x64).
 
 ## Use
 
@@ -37,9 +38,11 @@ terminal.
 | `/sprint setup` | Connect a source, or change the configuration. |
 | `/sprint cleanup` | Remove the worktrees and local branches of merged units. |
 
-Each unit opens as a new chat in **Claude Desktop** on its own worktree, with the first message on
-your clipboard: paste it and send. (Claude Desktop can't take that first message from the command
-line yet.) Without Claude Desktop, units open in terminal tabs and start on their own.
+Each unit starts as a **background session** on its own worktree, already holding its first
+message, and shows in `claude agents`: you see which units wait for you, and `claude attach <id>`
+opens one. `/sprint status` reads the same states. Other launch modes: a **Claude Desktop** chat per
+unit (the first message is on your clipboard to paste, since Desktop can't take it from the command
+line yet), or a **terminal** tab per unit.
 
 ## Sources
 

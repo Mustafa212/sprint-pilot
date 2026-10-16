@@ -7,18 +7,24 @@ For each unit in the run file:
 1. **Its run** (launched units): in its worktree, read every `.ai-session/senior-dev/*.md` (senior-dev
    keeps one per story, and a finished run leaves `STATE.md`'s index, so read the folder, not the
    index): `Phase`, `NEXT`, `Waiting`, `PR` and `Last updated`. No such file (another workflow, or
-   not started): phase "—".
+   not started): phase "—". A background unit: also `claude agents --json --cwd <worktree>`; its
+   `state` `blocked` means it waits for the user (a question or a permission), and `failed` or
+   `stopped`, or no session at all, means it isn't running.
 2. **Git:** commits ahead of its base (`git rev-list --count origin/<base>..HEAD`) and uncommitted
    changes (`git status --porcelain`, yes or no).
 3. **Its pull request:** the run file's `PR`, else the run's `PR` line, else the host adapter's
    find_pr by the unit's branch (this covers every workflow). Write a URL found this way into the
    run file. Then its state (open, merged, abandoned) from the host adapter, with the server for the
-   remote's org. Merged: set the unit's status to `done`.
+   remote's org, and on an open one what holds it: draft, merge conflicts, a reviewer waiting for
+   the author or rejecting, approvals. Merged: set the unit's status to `done`.
 
 Show every unit, queued, stacked and held ones included:
 
 | Unit | Status | Phase | Waiting on you? | Last update | Commits | Uncommitted | PR |
 |---|---|---|---|---|---|---|---|
+
+`Waiting on you?` is yes when senior-dev's `Waiting` says so, a background session is `blocked`,
+or the pull request has conflicts or a reviewer waiting for the author; say which.
 
 Then offer what's ready, after the user's yes for each:
 - **A queued unit** whose dependencies are all done (merged): launch it (`references/launch.md`,
@@ -29,9 +35,10 @@ Then offer what's ready, after the user's yes for each:
   `git rebase --onto origin/<base> <the Stacked on commit>`, and set the brief's `Base` and
   `Stacked on` accordingly. A conflict: stop, leave the rebase for the unit's chat, and say so.
   Never force-push without the user's yes.
-- **A launched unit** with no update for a day and `Waiting: no`: its chat may be closed; offer to
-  open a new chat on its worktree (the launch script, same workflow). senior-dev resumes from its
-  `NEXT`.
+- **A launched unit that isn't running:** a background session `failed`, `stopped` or gone, or a
+  chat with no update for a day and `Waiting: no` (it may be closed). Offer to start it again on its
+  worktree (the launch script, same workflow); senior-dev resumes from its `NEXT`. A `blocked`
+  background unit: say `claude attach <id>` opens it.
 
 ## /sprint cleanup
 List the units whose pull request is merged. First check each one for commits saved nowhere else

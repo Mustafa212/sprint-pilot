@@ -29,6 +29,9 @@ $env:SP_WT = 'none'
 $r = Invoke-Launch @('-Dir', $dir, '-Mode', 'terminal', '-Workflow', 'senior-dev', '-DryRun')
 Check 'terminal without wt: PowerShell window' ($r.Code -eq 0 -and $r.Out.Contains('run: powershell -NoExit -Command Set-Location -LiteralPath'))
 
+$r = Invoke-Launch @('-Dir', $dir, '-Mode', 'background', '-Workflow', 'senior-dev', '-DryRun')
+Check 'background: --bg with the unit name and the message, in the folder' ($r.Code -eq 0 -and $r.Out.Contains("run: C:\tools\claude.exe --bg --name sprint-7-101 $sd (in $dir)"))
+
 $r = Invoke-Launch @('-Dir', (Join-Path $dir 'missing'), '-Mode', 'desktop', '-Workflow', 'senior-dev', '-DryRun')
 Check 'missing folder: exit 2' ($r.Code -eq 2)
 
