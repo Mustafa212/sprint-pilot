@@ -3,6 +3,13 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.0.2 — 2026-10-16 (cleanup keeps unsaved commits)
+- `/sprint cleanup` first checks each merged unit's branch for commits saved nowhere else (ahead of
+  its remote branch, or after the pull request's last source commit when the remote branch is
+  gone) and leaves such a unit out, showing the commits; it also says to close the unit's chat
+  first. Why: after a squash merge it used `git branch -D`, which would lose a commit made after the
+  last push. Found by comparing with how Claude Code's own worktree cleanup checks for unsaved work.
+
 ## 1.0.1 — 2026-10-16 (fixes from the first live Azure DevOps dry run)
 - Azure DevOps Connect: a configured server that fails or times out at session start needs a longer
   MCP startup timeout (`MCP_TIMEOUT=120000`); the README says so too. Why: `npx` took longer than
