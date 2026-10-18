@@ -49,8 +49,9 @@ line yet), or a **terminal** tab per unit.
 | Source | Status |
 |---|---|
 | Azure DevOps Boards (+ Azure Repos) | dry run tested on a live sprint; launch not yet |
+| Jira Software Cloud | reads tested on a live project; launch not yet |
 | A Markdown file (try it without a tracker) | tested |
-| GitHub Issues, Jira, Notion, Linear | planned |
+| GitHub Issues, Notion, Linear | planned |
 
 Connections go through each tracker's own MCP server, which signs you in; sprint-pilot never
 stores a token, and nothing about your org or projects goes into the plugin.
@@ -75,6 +76,23 @@ for each `ado-<org>` server (prefix every tool with `mcp__ado-<org>__`):
 |---|---|---|
 | deny | `wit_work_item_comment_write`, `repo_pull_request_thread_write`, `repo_create_branch`, `work_iteration_write`, `work_capacity_write` | nothing here needs them |
 | ask | `wit_work_item_write`, `wit_work_item_link_write`, `repo_pull_request_write` | the unit's workflow opens the pull request, links it and sets the review state, after your yes |
+
+### Jira
+
+Atlassian's remote MCP server, one for every site you can open; the project file names the site,
+its `cloudId`, the project key and the Scrum board. Sign in with `/mcp` after adding it:
+
+```bash
+claude mcp add --transport http atlassian https://mcp.atlassian.com/v2/mcp
+```
+
+sprint-pilot itself writes nothing to Jira. Recommended rules for the server (prefix every tool
+with `mcp__atlassian__`):
+
+| Rule | Tools | Why |
+|---|---|---|
+| deny | `executeDestructive` | nothing here deletes or closes anything |
+| ask | `executeWrite`, `editJiraIssue`, `transitionJiraIssue`, `createJiraIssue`, `addOrEditJiraIssueComment` | the unit's workflow links the pull request and sets the review state, after your yes |
 
 ### Safety
 

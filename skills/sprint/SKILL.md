@@ -1,6 +1,6 @@
 ---
 name: sprint
-description: Plans and starts the user's sprint from their tracker (Azure DevOps, or a Markdown file): checks each assigned story for gaps, plans branches and order around teammates' work, then opens one git worktree and one chat per unit. Use when the user types /sprint, asks what's assigned to them this sprint, or wants to plan, start, track or clean up their sprint tasks ("my tasks", "التاسكات اللي عليا", "ابدأ السبرينت", "sprint status"). Not for the work on one story inside a unit's own chat, or for a personal to-do list.
+description: Plans and starts the user's sprint from their tracker (Azure DevOps, Jira, or a Markdown file): checks each assigned story for gaps, plans branches and order around teammates' work, then opens one git worktree and one chat per unit. Use when the user types /sprint, asks what's assigned to them this sprint, or wants to plan, start, track or clean up their sprint tasks ("my tasks", "التاسكات اللي عليا", "ابدأ السبرينت", "sprint status"). Not for the work on one story inside a unit's own chat, or for a personal to-do list.
 argument-hint: "[plan --dry-run | status | setup | cleanup] [--project <name>]"
 ---
 
