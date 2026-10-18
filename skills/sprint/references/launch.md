@@ -125,7 +125,7 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 
 ```
 # <sprint> — <project> (started <date>)
-Source: azure-devops (org: <org>, MCP server: ado-<org>, project: <project>, team: <team>) | file (<path>)
+Source: azure-devops (org: <org>, MCP server: ado-<org>, project: <project>, team: <team>) | jira (site: <url>, cloudId: <id>, MCP server: <server>, project: <KEY>, board: <id>) | file (<path>)
 | Unit | Story | Repo | Branch ← base | Worktree | Workflow | Status | PR | Launched | Session |
 |---|---|---|---|---|---|---|---|---|---|
 Queue: <unit> (waits for <unit> | held: gap #n), …

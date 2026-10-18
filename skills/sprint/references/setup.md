@@ -23,7 +23,7 @@ Launch: background                      (background | desktop | terminal)
 ```
 # <project>
 Repos: <path> (<remote URL>)[, …]
-Source: azure-devops (org: <last org used>, project: <project>, team: <team>) | file (<path>)
+Source: azure-devops (org: <last org used>, project: <project>, team: <team>) | jira (site: <url>, cloudId: <id>, project: <KEY>, board: <id>) | file (<path>)
 Done states: Done, Closed, Removed
 Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | <one branch, e.g. dev> | none (the default branch)
 Branch name: <pattern with {n}, {id}, {slug}, e.g. Sprint_{n}_{id}-{slug}>
@@ -56,12 +56,14 @@ org and server:
 Source: azure-devops (org: <org>, MCP server: ado-<org>, project: <project>, team: <team>)
 ```
 
+For a Jira source, the project file's coordinates and the server:
+`Source: jira (site: <url>, cloudId: <id>, MCP server: <server>, project: <KEY>, board: <id>)`.
 For a file source: `Source: file (<path>)`. A dry run shows the question as "(would ask)" and
 writes nothing.
 
 ## First run on this machine
-1. Ask where the user's items live (AskUserQuestion): Azure DevOps, or a file (to try sprint-pilot
-   without a tracker). Jira, GitHub Issues, Notion and Linear arrive in later versions: say so if
+1. Ask where the user's items live (AskUserQuestion): Azure DevOps, Jira, or a file (to try
+   sprint-pilot without a tracker). GitHub Issues, Notion and Linear arrive in later versions: say so if
    the user names one.
 2. Follow the adapter's "Connect" section (`references/sources/<source>.md`). Never ask the user to
    paste a token into the chat, and never write one to a file.
@@ -82,7 +84,8 @@ writes nothing.
 
 ## First run on a project
 Ask only what can't be found:
-- The source's coordinates (the adapter says which: for Azure DevOps the project and team).
+- The source's coordinates (the adapter says which: for Azure DevOps the project and team; for Jira
+  the site, project key and board).
 - The sprint-branch pattern: propose one from the remote branches with numbers (`git branch -r`:
   `Sprint_25`, `Sprint_26` → `Sprint_{n}`); with none, the one long-lived branch the work lands on
   when the default branch lags far behind it (`git rev-list --count origin/<default>..origin/<branch>`
@@ -90,7 +93,7 @@ Ask only what can't be found:
   `dev`); else none.
 - The branch-name pattern: propose one from recent branch names.
 - The PR target rule, and the review state for each item type the user gets (Azure DevOps:
-  `wit_work_item`, action `get_type`, lists a type's states).
+  `wit_work_item`, action `get_type`, lists a type's states; Jira: `listJiraStatuses`, `mode: project`).
 - The worktree setup: propose the ignored local files a fresh worktree lacks (`git ls-files --others
   --ignored --exclude-standard`, config files only, never anything that looks like a secret store
   you'd need to read) and the install command from the lockfiles (`npm ci`, `dotnet restore`,

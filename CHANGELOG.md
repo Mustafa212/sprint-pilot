@@ -3,6 +3,17 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.4.0 — 2026-10-18 (Jira source)
+- **Jira Software Cloud as a source** (`references/sources/jira.md`), over Atlassian's remote MCP
+  server: the active sprint of the project's board (or, when none is started, the next one, after
+  asking), the user's items by JQL, each item with its parent, sub-tasks, links, comments and
+  attachments, and the operations the unit's PR step uses to link the pull request and move the
+  state. An epic parent is context, not the story. Setup, the run file's `Source:` line, the
+  README and the description name it. Why: teams on Jira couldn't use sprint-pilot at all, and
+  the alternative, copying a sprint into a file, loses the link to the tracker. Checked against a
+  live Jira Cloud project: board sprints, JQL, issue links in both directions, the attachment
+  field, and an unstarted sprint.
+
 ## 1.3.0 — 2026-10-18 (names fixed where units meet; work already in the code)
 - **Names where units meet:** when two units of a plan meet (one calls an endpoint the other adds,
   or both add translation keys or permissions), the plan fixes the exact names each adds, and both
