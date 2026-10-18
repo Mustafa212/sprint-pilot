@@ -89,6 +89,7 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 | # | Gap | Story line | Blocks start? | Who decides | Recommendation |
 |---|---|---|---|---|---|
 - Settled by the code: <question — answer (`file:line`); …, or none>
+- Already in the code: <what exists (`file:line`) and what's still missing, or nothing found>
 - Out of scope (per the story): <…, or not stated>
 
 ## Touched areas (the scout's estimate, on origin/<base> @ <commit at planning>)
@@ -96,7 +97,10 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 |---|---|---|---|
 
 ## Shared with other units
-- <area>: <unit (branch), or a teammate's branch (author)>; … — or "none", and drop the two rules
+- <area>: <unit (branch), or a teammate's branch (author)>; … — or "none", and drop the rules below
+- Names fixed by the plan: <endpoint paths and DTO fields, message and translation keys, permission
+  names this unit adds or uses where it meets another unit, or none>. Use them exactly; if you need
+  a different name, stop and ask the user.
 - In these areas change only what the story needs: no reformatting, renames or moves; add a new
   signature rather than change an existing one.
 - If you need more there, stop and ask the user, naming the other unit.

@@ -3,6 +3,17 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.3.0 — 2026-10-18 (names fixed where units meet; work already in the code)
+- **Names where units meet:** when two units of a plan meet (one calls an endpoint the other adds,
+  or both add translation keys or permissions), the plan fixes the exact names each adds, and both
+  briefs carry them under `## Shared with other units`; a unit that needs a different name stops
+  and asks. Why: parallel units each guessed field and key names, and the mismatch showed only at
+  integration.
+- **Already in the code:** the scout checks whether the story's behavior already exists, searching
+  by concept and synonyms, not only the story's words, and reports it with where it looked; the
+  plan and the brief show it. Why: a story worded differently from the code (archive versus a
+  hidden flag) led to a second implementation.
+
 ## 1.2.0 — 2026-10-16 (background sessions; pull request state on the board)
 - **Launch mode `background`** (now the default for a new setup): each unit starts with
   `claude --bg --name <worktree>` and its first message, so nothing is pasted, and shows in
