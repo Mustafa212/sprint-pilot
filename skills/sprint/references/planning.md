@@ -78,6 +78,11 @@ Compare every pair of units, and every unit with the in-flight branches:
 | A tracker dependency between their items (blocked-by, blocks, predecessor, successor) | dependency |
 | An in-flight branch or pull request changes a file in a unit's touched areas | warning: name the branch and its author |
 
+Where two units of this plan meet (one calls an endpoint the other adds, or both add translation
+keys or permissions), the plan fixes the exact names each one adds: endpoint paths and DTO fields,
+message and translation keys, permission names. Both briefs carry them under
+`## Shared with other units`.
+
 A dependency a scout finds that the tracker doesn't record (one story needs code another unit adds)
 counts the same, marked "found by scout", with a suggestion to add the link in the tracker. A unit
 that depends on another unit of this plan is queued behind it. For a conflict risk without a
@@ -100,9 +105,10 @@ row. PR target: from the project's rule; for `ask`, ask once here.
 
 ## The plan
 Show, in this order:
-1. **Gaps per story:** the scouts' tables with recommendations, what the code settles, and what
-   the story leaves out. Each gap goes to whoever its scout named under `Who decides`, or into the
-   unit's Phase 1.
+1. **Gaps per story:** the scouts' tables with recommendations, what the code settles, what
+   already exists in the code, and what the story leaves out. Behavior that already exists in part
+   changes the unit's scope: say how. Each gap goes to whoever its scout named under `Who decides`,
+   or into the unit's Phase 1.
 2. **The plan table:**
 
    | Unit | Story / tasks | Repo | Branch ← base | Scope | Gaps | Depends on | Conflicts / warnings | Workflow | Start |

@@ -25,6 +25,10 @@ and lockfiles, shared test fixtures). Give each a confidence (high: you found th
 medium: the likely place; low: a guess from naming) and the evidence as `file:line`. Read only
 what you need.
 
+Then check whether the behavior already exists, in whole or in part. Search by the concept and its
+synonyms (archive: hidden, inactive, soft delete), not only the story's words, and say where you
+looked.
+
 ## 2. Gaps
 Start with the acceptance criteria, listed as written. No criteria, or one whose result nobody
 could observe, is a gap. A criterion you infer is a gap to confirm ("inferred: …, confirm"), never
@@ -62,6 +66,8 @@ story needs.
 |---|---|---|---|---|---|
 
 **Settled by the code:** <question — answer (`file:line`); …, or "none">
+
+**Already in the code:** <what exists (`file:line`) and what's still missing, or "nothing found">; looked in <where>
 
 **Out of scope (per the story):** <what the story leaves out, or "not stated">
 
