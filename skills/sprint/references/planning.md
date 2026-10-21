@@ -25,7 +25,12 @@ For each repository, `git fetch --prune origin`, then:
    (`references/hosts/`); a remote on any other host (or a local path) has none. For each branch or
    pull request: its author and changed files (`git diff --name-only origin/<base>...origin/<branch>`).
 4. **The local checkout:** its branch, whether it's dirty (`git status --porcelain`), and how far it
-   is behind the base (`git rev-list --count HEAD..origin/<base>`). The scouts read this checkout.
+   is behind the base (`git rev-list --count HEAD..origin/<base>`). When it's on another branch or
+   behind, the scouts read a snapshot of the base instead, which changes nothing in the repository:
+   `git archive origin/<base> | tar -x -C <scratch>/<repo>-<base>`, removed after the scouts return.
+   Otherwise they read this checkout.
+5. **Tools the units will need:** when the project's notes name a database or other MCP server,
+   check it answers; one that doesn't is said in the briefs, so units plan around it.
 
 ## Scouts (step 3, then)
 Dispatch one `sprint-pilot:scout` per story with the Agent tool, all in one message, with the
@@ -61,7 +66,8 @@ rest of the story (another unit of this plan, or teammates' tasks by assignee).
 ## Branch names
 Fill the project's branch-name pattern: {n} the sprint number, {id} the story id (the task id for a
 per-task unit), {slug} the title in kebab-case, ASCII letters and digits only, at most 40
-characters; when nothing ASCII is left (a title in Arabic, for example), drop `{slug}` and the
+characters, or {Slug} the title in PascalCase, ASCII letters and digits only, no separators, at
+most 80; when nothing ASCII is left (a title in Arabic, for example), drop the slug and the
 separator before it. If the name exists locally or on the remote: when that branch has no commits of
 its own (`git rev-list --count origin/<base>..origin/<branch>` is 0) and no worktree uses it, it was
 most likely made for this item, so propose reusing it; otherwise add `-2` (then `-3`, …). The user
@@ -101,7 +107,12 @@ A unit with a gap that blocks the start defaults to `held (gap #n)`; the user ca
 Start now: units with no dependency and not held, up to the max parallel units minus the units the
 run file shows as launched and not done, larger first. The rest queue in dependency order. Workflow:
 the config's default for every unit; ask once per run whether to keep it, and accept changes per
-row. PR target: from the project's rule; for `ask`, ask once here.
+row. End: from the project's `End:` (default `pr`); confirm it once per run. PR target (for `pr`):
+from the project's rule; for `ask`, ask once here.
+
+Record each decision the plan makes across units (where a shared value lives, which field marks
+what, how money moves) as `D-n` in the run file, and put each one in the brief of every unit whose
+touched areas it reaches.
 
 ## The plan
 Show, in this order:

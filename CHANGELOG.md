@@ -3,6 +3,33 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.5.0 — 2026-10-21 (lessons from a first live launch)
+- **Branch style from the repository:** the pattern keeps the existing branches' casing (`{Slug}`
+  for PascalCase, `{slug}` for kebab-case) and setup shows two sample names. Why: a run produced
+  kebab-case names in a repository that uses PascalCase, and the branches were renamed mid-run.
+- **How a unit ends (`End:`):** `pr`, `push-for-review` or `local`, set in the project file, confirmed
+  once per run, and written in every brief (`PR target: none` unless `pr`). Before the first launch
+  the user hears that each unit asks once before pushing, with an allow rule to suggest when a
+  permission mode blocks pushes. Why: "push for my review, no pull request" was added after launch,
+  every unit needed an extra round, and one unit could not push at all.
+- **Telling a running unit:** changes go into its `.ai-session/launch.md` and, in desktop mode,
+  through the app's session tool. Why: cross-session messages between sessions in different
+  permission modes were held and expired unread.
+- **Scouts:** they get linked test cases' titles and name attachments that may settle a gap, and
+  read a `git archive` snapshot of the base when the checkout is elsewhere. Why: a test case
+  reversed a scout's recommendation, a screenshot answered a "blocking" gap, and the checkout
+  lacked the base's newest commit.
+- **Decisions across units (`D-n`):** recorded in the run file and carried in each affected brief;
+  `/sprint status` checks units' commits against them and against siblings' touched areas. Why: one
+  unit changed how a shared value was stored, which broke a sibling's assumption, and nobody saw it
+  until the end.
+- **Tools and timeouts:** setup suggests `MCP_TIMEOUT` on Windows; planning checks that a database
+  MCP the notes name answers. Why: the tracker server timed out at start, and a database needed a VPN.
+- **Learnings and cleanup:** every brief asks for `.ai-session/sprint-learnings.md`; cleanup also
+  handles push-for-review units (branch kept), archives without build output, and gathers the
+  learnings into one file. Why: the learnings were collected by hand, and build output made each
+  archive hundreds of megabytes.
+
 ## 1.4.0 — 2026-10-18 (Jira source)
 - **Jira Software Cloud as a source** (`references/sources/jira.md`), over Atlassian's remote MCP
   server: the active sprint of the project's board (or, when none is started, the next one, after

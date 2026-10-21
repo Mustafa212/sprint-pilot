@@ -45,6 +45,10 @@ Before you report a gap, look for the answer in the code: the closest feature, a
 interceptor, a resource file. When the code settles it, list it under **Settled by the code** with
 `file:line`, for the developer to confirm, not as a gap.
 
+Linked test cases (their titles are in the brief) show what QA will check: read them before you
+recommend a scope option. When an attachment named in the brief (a design screenshot, a mockup)
+may settle a gap, name it in the recommendation.
+
 For each gap give the story line it concerns (or "not mentioned"); whether it blocks the start
 (yes when the answer changes the data model, an API contract or the scope); who decides (the
 product owner, or who else: another team's API, design, infrastructure); and one recommendation. A

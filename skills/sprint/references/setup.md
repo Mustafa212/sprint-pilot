@@ -26,7 +26,8 @@ Repos: <path> (<remote URL>)[, …]
 Source: azure-devops (org: <last org used>, project: <project>, team: <team>) | jira (site: <url>, cloudId: <id>, project: <KEY>, board: <id>) | file (<path>)
 Done states: Done, Closed, Removed
 Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | <one branch, e.g. dev> | none (the default branch)
-Branch name: <pattern with {n}, {id}, {slug}, e.g. Sprint_{n}_{id}-{slug}>
+Branch name: <pattern with {n}, {id}, {slug} or {Slug}, e.g. Sprint_{n}_{id}-{slug} or Sprint_{n}_{Slug}>
+End: pr | push-for-review | local     (how a unit ends; default pr)
 PR target: sprint-branch | default-branch | ask
 Review state: <item type> → <the tracker's state for "in review">, … (e.g. Task → In Review, Bug → Resolved)
 Worktree setup: copy <ignored local files, e.g. .env>; run <install command> | none
@@ -66,9 +67,11 @@ writes nothing.
    sprint-pilot without a tracker). GitHub Issues, Notion and Linear arrive in later versions: say so if
    the user names one.
 2. Follow the adapter's "Connect" section (`references/sources/<source>.md`). Never ask the user to
-   paste a token into the chat, and never write one to a file.
+   paste a token into the chat, and never write one to a file. On Windows, MCP servers started with
+   `npx` often miss the 30-second startup timeout: suggest `setx MCP_TIMEOUT 120000` (and a restart)
+   before the first run, not after a failed one.
 3. Ask the default workflow, and check it's there: for senior-dev, `claude plugin list` shows
-   `senior-dev` at 1.4.0 or later (it reads `Brief-Version: 1`); for superpowers, `superpowers`.
+   `senior-dev` at 1.10.0 or later (it reads the brief's `End:` line); for superpowers, `superpowers`.
    Missing or older: give the install or update command, or offer another workflow.
 4. Ask the launch mode:
    - **background** (recommended): each unit runs as a background session (`claude --bg`), started
@@ -91,7 +94,11 @@ Ask only what can't be found:
   when the default branch lags far behind it (`git rev-list --count origin/<default>..origin/<branch>`
   in the hundreds, and the default branch untouched for months: propose that branch, for example
   `dev`); else none.
-- The branch-name pattern: propose one from recent branch names.
+- The branch-name pattern: propose one from recent branch names, keeping their style: separators,
+  whether ids appear, and the title's casing (`{Slug}` for PascalCase such as `ExportMonthlyInvoices`,
+  `{slug}` for kebab-case). Show two names it would produce from this sprint's titles.
+- How a unit ends (`End:`): `pr` (the workflow opens a pull request), `push-for-review` (it pushes
+  the branch and the user reviews it before any pull request) or `local` (commit only).
 - The PR target rule, and the review state for each item type the user gets (Azure DevOps:
   `wit_work_item`, action `get_type`, lists a type's states; Jira: `listJiraStatuses`, `mode: project`).
 - The worktree setup: propose the ignored local files a fresh worktree lacks (`git ls-files --others

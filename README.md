@@ -19,7 +19,7 @@ claude plugin marketplace add Mustafa212/sprint-pilot
 claude plugin install sprint-pilot@sprint-pilot
 ```
 
-Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.6.0 or later, which
+Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.10.0 or later, which
 reads the launch brief each unit starts with (the story, the unit's scope, the tracker server and
 the review state), reports its progress to `/sprint status`, and asks to open the pull request at
 the end. `/sprint setup` checks it's installed.
@@ -105,7 +105,7 @@ rules above are the real barrier: they apply to every agent and every unit's cha
 ```
 ~/.claude/sprint-pilot/          (or $SPRINT_PILOT_HOME)
   config.md                      sources, Azure DevOps orgs, default workflow, max parallel units, scout model, launch mode
-  projects/<project>.md          repositories, tracker coordinates, branch patterns, PR target, review state
+  projects/<project>.md          repositories, tracker coordinates, branch patterns, End, PR target, review state
   runs/<project>-<sprint>.md     each run's source, units, branches, worktrees, pull requests and queue
   runs/<project>-<sprint>/       the units' briefs, and the archive /sprint cleanup keeps of each unit's .ai-session/
 ```
