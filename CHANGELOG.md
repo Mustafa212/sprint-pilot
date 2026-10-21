@@ -3,6 +3,15 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.6.0 — 2026-10-21 (opt-in autopilot)
+- **`Autopilot: on` in the project file** (default off, set only when the user asks): each unit's
+  brief gets `Approvals: auto` (the workflow takes its own recommendations instead of asking; see
+  senior-dev 1.11.0), and `/sprint status` merges a unit's pull request once it is open, not a
+  draft, mergeable and green, then launches the queued units whose dependencies are merged.
+  Conflicts, failed or missing checks, drafts and held units still go to the user. Why: a user
+  running a sprint unattended wanted it to keep moving on the recommendations unless they said no;
+  answering every gate and merge by hand was the bottleneck.
+
 ## 1.5.0 — 2026-10-21 (lessons from a first live launch)
 - **Branch style from the repository:** the pattern keeps the existing branches' casing (`{Slug}`
   for PascalCase, `{slug}` for kebab-case) and setup shows two sample names. Why: a run produced

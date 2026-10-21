@@ -77,6 +77,7 @@ Link PR to: <the work items, and the story>
 Review state: <id> → <state>; … | none
 Repo: <repository path>   Branch: <branch>   Base: <base>   PR target: <branch | none>
 End: <pr | push-for-review | local>
+Approvals: <user | auto>
 Stacked on: <branch> @ <commit> | none
 Workflow: <senior-dev | superpowers | none>
 Depends on: <unit (branch), or none>   Conflicts: <unit: area; …, or none>
@@ -131,6 +132,8 @@ slowed you down or helped, with one improvement each. No story text and no secre
 - `Review state`: the project file's review state for each item's type. Move only this unit's work
   items; move the story too only when this unit owns all of it (no other unit or teammate has tasks
   under it). File source: `none`.
+- `Approvals`: `auto` when the project file says `Autopilot: on`, else `user`. With `auto` the
+  workflow takes its own recommendations instead of asking (senior-dev's launch brief reference).
 - `End`: the run's choice. `PR target` is `none` unless `End` is `pr`.
 - `PR target`: the base when the project's rule is sprint-branch, the default branch for
   default-branch; for ask, the answer from planning. A stacked unit's PR target stays that rule,

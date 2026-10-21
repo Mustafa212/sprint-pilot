@@ -32,6 +32,11 @@ conflict, a dependency or a `D-n` with, and read those hunks against each `D-n` 
 every overlap, and every change that contradicts a decision a sibling relies on, above the table:
 units built in parallel drift from the plan, and it shows only when they meet.
 
+With the project's `Autopilot: on`, first do these without asking, and say what was done: merge each
+unit's pull request that is open, not a draft, mergeable and has every check passed (a merge commit;
+the unit becomes `done`), then launch the queued units whose dependencies are all merged. A conflict,
+a failed or missing check, a draft, or a held unit is left for the user.
+
 Then offer what's ready, after the user's yes for each:
 - **A queued unit** whose dependencies are all done (merged): launch it (`references/launch.md`,
   from its saved brief).

@@ -28,6 +28,7 @@ Done states: Done, Closed, Removed
 Sprint branch: <pattern with {n}, e.g. Sprint_{n}> | <one branch, e.g. dev> | none (the default branch)
 Branch name: <pattern with {n}, {id}, {slug} or {Slug}, e.g. Sprint_{n}_{id}-{slug} or Sprint_{n}_{Slug}>
 End: pr | push-for-review | local     (how a unit ends; default pr)
+Autopilot: on | off                   (default off; the user's opt-in, see below)
 PR target: sprint-branch | default-branch | ask
 Review state: <item type> → <the tracker's state for "in review">, … (e.g. Task → In Review, Bug → Resolved)
 Worktree setup: copy <ignored local files, e.g. .env>; run <install command> | none
@@ -106,6 +107,11 @@ Ask only what can't be found:
   you'd need to read) and the install command from the lockfiles (`npm ci`, `dotnet restore`,
   `flutter pub get`, `uv sync`, …), or none.
 Write `projects/<project>.md` and show it.
+
+`Autopilot: on` is the user's standing yes, set only when they ask for it: units get
+`Approvals: auto`, and `/sprint status` merges green pull requests and launches the next queued units
+without asking (`references/status.md`). Anything with no recommendation, a conflict or a failed check
+still goes to the user.
 
 Keep these files small and true: date each confirmed value, and fix a value the moment it proves
 wrong.
