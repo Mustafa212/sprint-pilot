@@ -19,6 +19,12 @@ which may be days old. Update it first:
    (`git diff --name-only <planned commit>...origin/<base>`, the commit in the touched-areas
    heading).
 
+## Before the first launch
+- When `End` is `pr` or `push-for-review`, each unit pushes its branch at the end and still asks once
+  in its own chat. A unit in a permission mode that blocks pushes can't push at all: tell the user,
+  and suggest an allow rule for `git push -u origin <the branch pattern's prefix>*` in their
+  settings. Never add it yourself.
+
 ## For each unit that starts now, in plan order, one at a time
 1. **Worktree.** In the unit's repository: `git fetch origin`, then
    `git worktree add --no-track -b <branch> "<repo-parent>/<repo-name>.worktrees/<branch-slug>" origin/<base>`
@@ -69,7 +75,8 @@ Work items: <id> (<type>), … — this unit's items: the user's tasks, or the s
 Scope: <this unit's tasks and repository; who owns the rest of the story: <unit> or <teammate>'s tasks>
 Link PR to: <the work items, and the story>
 Review state: <id> → <state>; … | none
-Repo: <repository path>   Branch: <branch>   Base: <base>   PR target: <branch>
+Repo: <repository path>   Branch: <branch>   Base: <base>   PR target: <branch | none>
+End: <pr | push-for-review | local>
 Stacked on: <branch> @ <commit> | none
 Workflow: <senior-dev | superpowers | none>
 Depends on: <unit (branch), or none>   Conflicts: <unit: area; …, or none>
@@ -105,6 +112,15 @@ Attachments: <name (id); …, or none> — download them with the Source server 
   signature rather than change an existing one.
 - If you need more there, stop and ask the user, naming the other unit.
 
+## Decisions from other units
+- D-<n>: <the decision, from the run file> — owned by <unit (branch)>; or "none"
+
+## Learnings for the sprint lead
+After the unit ends, write `.ai-session/sprint-learnings.md` (never committed): what you learned
+about the project (flows, conventions, traps, with `file:line`), what you discovered and left
+alone (bugs, risky areas, rule breaks), what this brief or the plan got wrong or missed, and what
+slowed you down or helped, with one improvement each. No story text and no secrets.
+
 ## Merged before this unit (only in a brief launched later)
 - <pull request link> — <title>
 - Changed on <base> since planning, in this unit's areas: <files, or none>
@@ -115,6 +131,7 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 - `Review state`: the project file's review state for each item's type. Move only this unit's work
   items; move the story too only when this unit owns all of it (no other unit or teammate has tasks
   under it). File source: `none`.
+- `End`: the run's choice. `PR target` is `none` unless `End` is `pr`.
 - `PR target`: the base when the project's rule is sprint-branch, the default branch for
   default-branch; for ask, the answer from planning. A stacked unit's PR target stays that rule,
   never the branch it's stacked on.
@@ -134,3 +151,10 @@ Queue: <unit> (waits for <unit> | held: gap #n), …
 `Status`: planned, queued, stacked, held, launched, done (pull request merged), or cleaned. `PR`:
 the pull request's URL once `/sprint status` finds it. `Session`: the background session's id
 (background mode), else empty.
+
+## Telling a running unit something
+A change after launch (a renamed branch, a new decision, a different `End`) goes into the unit's
+`.ai-session/launch.md`, the copy that survives a compaction, and then to the unit itself. In
+desktop mode, use the desktop app's session tool (list the sessions, match `cwd` to the worktree,
+send the message): a cross-session message between sessions in different permission modes is held
+and expires unread. Rename a branch only while it has no commits, and tell the unit at once.

@@ -54,8 +54,8 @@ source (`references/setup.md`, "The run's source").
 ## Step 2 — Your items
 With the project's source adapter: the sprint (name and n), then read the run file
 `runs/<project>-<sprint>.md` when it exists (its `Source:` org must match this run's, or stop and
-ask). Then whoami, my_items, and get_item for each (parent story, children, links, and the
-attachments' names). Show a short list (id, type, title, state, parent story), with tasks under
+ask). Then whoami, my_items, and get_item for each (parent story, children, links, linked
+test cases' titles, and the attachments' names). Show a short list (id, type, title, state, parent story), with tasks under
 their parent story. A task with no parent story is its own story. No items: say so and stop.
 
 ## Step 3 — Analyze

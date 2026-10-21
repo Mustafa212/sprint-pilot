@@ -26,6 +26,12 @@ Show every unit, queued, stacked and held ones included:
 `Waiting on you?` is yes when senior-dev's `Waiting` says so, a background session is `blocked`,
 or the pull request has conflicts or a reviewer waiting for the author; say which.
 
+**Cross-unit check:** for each unit with commits, compare its changed files
+(`git diff --name-only origin/<base>...<branch>`) with the touched areas of the units it shares a
+conflict, a dependency or a `D-n` with, and read those hunks against each `D-n` it touches. Report
+every overlap, and every change that contradicts a decision a sibling relies on, above the table:
+units built in parallel drift from the plan, and it shows only when they meet.
+
 Then offer what's ready, after the user's yes for each:
 - **A queued unit** whose dependencies are all done (merged): launch it (`references/launch.md`,
   from its saved brief).
@@ -41,7 +47,8 @@ Then offer what's ready, after the user's yes for each:
   background unit: say `claude attach <id>` opens it.
 
 ## /sprint cleanup
-List the units whose pull request is merged. First check each one for commits saved nowhere else
+List the units that are finished: the pull request is merged, or, for `End: push-for-review` or
+`local`, the user says the unit is done. First check each one for commits saved nowhere else
 (a merged PR proves only that the commits it had landed):
 - The remote branch still exists: `git rev-list --count origin/<branch>..<branch>`.
 - It was deleted: `git rev-list --count <last source commit>..<branch>`, with the PR's last source
@@ -53,11 +60,18 @@ out and say why.
 Ask once, naming for each remaining unit what will happen, including that its `.ai-session/`
 (state, delivery log, evidence) is archived first, and that its chat should be closed first. After
 the yes, for each:
-1. Copy `<worktree>/.ai-session/` to `runs/<project>-<sprint>/archive/<unit>/` (attachments
-   excluded). `git worktree remove` deletes ignored files, so this copy is the only one left.
+1. Copy `<worktree>/.ai-session/` to `runs/<project>-<sprint>/archive/<unit>/` (attachments and
+   build output such as `bin/`, `obj/` and `node_modules/` excluded). `git worktree remove` deletes
+   ignored files, so this copy is the only one left.
 2. `git worktree remove <path>`. It refuses when there are uncommitted changes: report it, never
    force.
-3. `git branch -d <branch>`. A squash merge makes it refuse even though the host says merged: then,
+3. Only for a merged pull request: `git branch -d <branch>`. A branch kept for review
+   (`push-for-review`, `local`) stays. A squash merge makes it refuse even though the host says merged: then,
    because the host confirmed the merge and the check above found no unsaved commits, ask once more
    and use `git branch -D <branch>` for that branch only.
 4. Mark the unit `cleaned` in the run file. Never delete a remote branch.
+
+When every unit is cleaned, read each archived `sprint-learnings.md`, write
+`runs/<project>-<sprint>/learnings.md` (what repeats across units first), and offer to move the
+project facts into the workflow's project notes and the process lessons into proposals for the
+plugins. Nothing is merged into notes or plugins without the user's yes.
