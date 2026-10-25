@@ -62,21 +62,33 @@ List the units that are finished: the pull request is merged, or, for `End: push
 More than 0: show those commits (`git log --oneline`) and leave that unit out. Can't tell: leave it
 out and say why.
 
-Ask once, naming for each remaining unit what will happen, including that its `.ai-session/`
-(state, delivery log, evidence) is archived first, and that its chat should be closed first. After
-the yes, for each:
-1. Copy `<worktree>/.ai-session/` to `runs/<project>-<sprint>/archive/<unit>/` (attachments and
+**Merged units need no question** when the config says `Cleanup: after merge` (the default): the
+host confirmed the merge and the check above found nothing unsaved, so say what is being done and
+do it. That is how the board's hand-over runs (it sends this session a message naming each merged
+unit). Every other finished unit, and every unit under `Cleanup: ask`, is asked about once, naming
+what will happen to it, including that its `.ai-session/` (state, delivery log, evidence) is
+archived first. Then, for each:
+1. **Close its chat**, so nothing holds the folder: a background session with
+   `claude stop <id>` (its id from `claude agents --json --cwd <worktree>`); a desktop chat with the
+   desktop app's archive tool, for the session whose folder is the worktree (the app may ask the
+   user). Neither available: ask the user to close it, and remove the folder later.
+2. Copy `<worktree>/.ai-session/` to `runs/<project>-<sprint>/archive/<unit>/` (attachments and
    build output such as `bin/`, `obj/` and `node_modules/` excluded). `git worktree remove` deletes
    ignored files, so this copy is the only one left.
-2. `git worktree remove <path>`. It refuses when there are uncommitted changes: report it, never
+3. **Its learnings, now:** read the archived `sprint-learnings.md`. What the brief or the plan got
+   wrong that a queued, held or stacked unit's saved brief repeats goes into that brief now (say
+   what changed); project facts the unit didn't put in the workflow's notes are offered for them.
+4. `git worktree remove <path>`. It refuses when there are uncommitted changes: report it, never
    force.
-3. Only for a merged pull request: `git branch -d <branch>`. A branch kept for review
-   (`push-for-review`, `local`) stays. A squash merge makes it refuse even though the host says merged: then,
-   because the host confirmed the merge and the check above found no unsaved commits, ask once more
-   and use `git branch -D <branch>` for that branch only.
-4. Mark the unit `cleaned` in the run file. Never delete a remote branch.
+5. Only for a merged pull request: `git branch -d <branch>`. A branch kept for review
+   (`push-for-review`, `local`) stays. A squash merge makes it refuse even though the host says
+   merged: then, because the host confirmed the merge and the check above found no unsaved commits,
+   use `git branch -D <branch>` for that branch only (under `Cleanup: ask`, ask once more first).
+6. Mark the unit `cleaned` in the run file. Never delete a remote branch.
 
 When every unit is cleaned, read each archived `sprint-learnings.md`, write
 `runs/<project>-<sprint>/learnings.md` (what repeats across units first), and offer to move the
 project facts into the workflow's project notes and the process lessons into proposals for the
-plugins. Nothing is merged into notes or plugins without the user's yes.
+plugins. Nothing is merged into notes or plugins without the user's yes. The workflow's own waiting
+proposals (senior-dev keeps them in `~/.claude/senior-dev/proposals/`) are applied now, by that
+workflow's rules for changing itself, since no unit is editing it any more.

@@ -119,7 +119,8 @@ Show, in this order:
 1. **Gaps per story:** the scouts' tables with recommendations, what the code settles, what
    already exists in the code, and what the story leaves out. Behavior that already exists in part
    changes the unit's scope: say how. Each gap goes to whoever its scout named under `Who decides`,
-   or into the unit's Phase 1.
+   or into the unit's Phase 1. A gap the user answers while reviewing the plan is recorded as that
+   gap's `Decision` in the brief, so the unit doesn't ask it again.
 2. **The plan table:**
 
    | Unit | Story / tasks | Repo | Branch ← base | Scope | Gaps | Depends on | Conflicts / warnings | Workflow | Start |
