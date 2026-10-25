@@ -3,6 +3,14 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.8.1 — 2026-10-25 (desktop: open every chat at once)
+- **Desktop launches open every unit's chat in one go,** then say once what each needs (trust the
+  folder, paste and send), instead of asking after each unit. Every unit's first message is the same
+  text, so the clipboard never has to change between them. Why: the per-unit question added a click
+  in the sprint chat for each unit on top of the two in the unit's own chat.
+- Checked live: the desktop app asks to trust a worktree's folder even inside a folder the user
+  already trusted (a worktree is a git root of its own), so the trust click per unit stays.
+
 ## 1.8.0 — 2026-10-25 (answer every unit from the sprint chat)
 - **`Answers: sprint-lead` in background briefs, and `/sprint answer`:** a background unit writes
   each question or gate to its `.ai-session/questions.md` instead of asking in its own session. The
