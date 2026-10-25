@@ -65,9 +65,10 @@ which may be days old. Update it first:
    Then, by exit code:
    - **0:** record the unit as launched in the run file now, before asking anything. Background
      mode: it printed the session's id; record it in the unit's `Session` column and go on to the next
-     unit. Desktop mode (the first message is on the clipboard): ask (AskUserQuestion) "Pasted — open
-     the next" / "It didn't open" (offer terminal mode for this unit) / "Stop here" (the units still
-     to start now become queued).
+     unit. Desktop mode: go on to the next unit too. Every unit's first message is the same text,
+     already on the clipboard, so all the chats open in one go; once the last one is open, tell the
+     user once, for every chat: trust the folder, then paste and send (Ctrl+V, Enter). Then ask
+     (AskUserQuestion) "All started" / "One didn't open" (name it; offer terminal mode for it).
    - **3:** it couldn't start: show the command it printed, for the user to run in a new terminal
      (in background mode the usual cause is a repository not trusted yet, and a terminal shows the
      trust prompt); record the unit as launched once they say it's running. On Windows in desktop or
