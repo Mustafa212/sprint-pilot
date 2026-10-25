@@ -19,7 +19,7 @@ claude plugin marketplace add Mustafa212/sprint-pilot
 claude plugin install sprint-pilot@sprint-pilot
 ```
 
-Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.12.0 or later, which
+Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.13.0 or later, which
 reads the launch brief each unit starts with (the story, the unit's scope, the tracker server, the
 review state and the gaps you already decided), asks for one approval of the unit's acceptance
 criteria and plan, reports its progress to the board, and asks at the end whether to open a pull
@@ -40,13 +40,20 @@ new folder, and the first message is pasted from the clipboard. The sprint board
 | `/sprint status` | Where every unit stands, and what's waiting on you. |
 | `/sprint setup` | Connect a source, or change the configuration. |
 | `/sprint cleanup` | Remove the worktrees and local branches of finished units. |
+| `/sprint answer` | Answer what the units ask, from the sprint chat. |
 | `/sprint-board` | Reopen the sprint board. |
 
 Each unit starts as a **background session** on its own worktree, already holding its first
 message, and shows in `claude agents`: `claude attach <id>` opens one.
 
+**You answer every unit from the sprint chat.** A background unit doesn't ask in its own session,
+where nobody sees it: it writes its question (its acceptance criteria and plan, a choice, the pull
+request step) to a file in its worktree and waits. The board brings it to the sprint chat, you
+answer there, your reply is written word for word to the unit's answers file, and the unit picks
+it up and goes on. Only a permission prompt still needs `claude attach <id>`.
+
 **The sprint board** is a pane beside your sprint chat. It opens by itself once the plan is
-approved and refreshes every minute: each unit's phase, what it waits for from you, its pull
+approved and refreshes every half minute: each unit's phase, what it waits for from you, its pull
 request and its background session, with a notice when a unit starts waiting. When a unit's pull
 request merges (GitHub; `/sprint status` covers other hosts), the board hands it to the chat, which
 cleans it up without asking: the unit's chat closed, its `.ai-session/` archived, its worktree and

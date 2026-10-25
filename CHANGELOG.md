@@ -3,6 +3,20 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.8.0 — 2026-10-25 (answer every unit from the sprint chat)
+- **`Answers: sprint-lead` in background briefs, and `/sprint answer`:** a background unit writes
+  each question or gate to its `.ai-session/questions.md` instead of asking in its own session. The
+  board shows it ("Q-3 AC and plan") and hands it to the sprint chat once. `/sprint answer` shows
+  it whole, with the unit's options. The user's reply is written word for word to the unit's
+  `.ai-session/answers.md`, and the board's hooks module, running in the unit's own session, wakes
+  it. Only the user's own reply goes into that file. Desktop and terminal units keep
+  `Answers: unit`. Why: a background unit nobody watches sat blocked on its questions until someone
+  attached, and the user wanted to answer every unit from the sprint session. A message between
+  sessions can't carry the user's yes, so the reply travels as a file the brief opts into.
+  Needs senior-dev 1.13.0.
+- **The board refreshes every half minute** (pull requests every five minutes), so an answer
+  reaches its unit within about 30 seconds.
+
 ## 1.7.0 — 2026-10-25 (the sprint board; cleanup after merge)
 - **The sprint board** (`hooks/board.tsx`, a Claude Code hooks module): a pane in the sprint lead's
   chat that opens by itself when the run file is written (`/sprint-board` reopens it). Every minute

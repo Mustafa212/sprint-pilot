@@ -91,6 +91,7 @@ Review state: <id> → <state>; … | none
 Repo: <repository path>   Branch: <branch>   Base: <base>   PR target: <branch | none>
 End: <pr | push-for-review | local>
 Approvals: <user | auto>
+Answers: <sprint-lead | unit>
 Stacked on: <branch> @ <commit> | none
 Workflow: <senior-dev | superpowers | none>
 Depends on: <unit (branch), or none>   Conflicts: <unit: area; …, or none>
@@ -148,6 +149,12 @@ missed, and what slowed you down or helped, with one improvement each. No story 
   under it). File source: `none`.
 - `Approvals`: `auto` when the project file says `Autopilot: on`, else `user`. With `auto` the
   workflow takes its own recommendations instead of asking (senior-dev's launch brief reference).
+- `Answers`: `sprint-lead` in background mode, so the unit never waits on a question nobody sees: it
+  writes each one to its `.ai-session/questions.md`, and `/sprint answer` brings it to the user here
+  (`references/status.md`). Desktop and terminal: `unit`, since the user is in that chat. A
+  permission prompt is the one thing a background unit still waits on in its own session: the board
+  shows it as blocked, and `claude attach <id>` answers it; allow rules for the commands the project
+  runs keep it rare.
 - `End`: the run's choice, which the unit offers first at its end; the user can still pick another.
 - `PR target`: the base when the project's rule is sprint-branch, the default branch for
   default-branch; for ask, the answer from planning. Set it whatever `End` says, since the unit

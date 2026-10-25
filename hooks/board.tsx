@@ -1,7 +1,8 @@
 // The sprint board: a pane in the sprint lead's session showing where every unit stands, read from
 // the run files, each unit's senior-dev state and its background session. While it is open it
-// refreshes every minute, says when a unit starts waiting for the user, and asks this session to
-// clean a unit up once its pull request has merged (the `/sprint cleanup` of a merged unit).
+// refreshes every half minute, says when a unit starts waiting for the user, hands this session
+// each question a unit asks (`/sprint answer`) and each unit whose pull request merged
+// (`/sprint cleanup`). In a unit's own session it wakes the unit once the user's answer is written.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
@@ -9,9 +10,11 @@ import type { SprintPilotUnit } from '../types'
 
 const PANE = 'sprint-board'
 const TITLE = 'Sprint board'
-const REFRESH_MS = 60_000
-// Pull requests are looked up on every fifth refresh: each lookup is a call to the host.
-const PR_CHECK_EVERY = 5
+const REFRESH_MS = 30_000
+// Pull requests are looked up on every tenth refresh: each lookup is a call to the host.
+const PR_CHECK_EVERY = 10
+const QUESTION = /^## (Q-\d+)\s*[—-]?\s*(.*?)\s*(?:\([^)]*\))?\s*$/gm
+const ANSWER = /^## (A-\d+) → (Q-\d+)/gm
 const SHOWN = new Set(['planned', 'queued', 'stacked', 'held', 'launched', 'done'])
 
 const units = atom({ plugin: 'sprint-pilot', key: 'units' } as const, [] as SprintPilotUnit[])
@@ -59,6 +62,21 @@ async function runState($: EngineInterface, worktree: string) {
   return { phase: field(text, 'Phase'), next: field(text, 'NEXT'), waiting: field(text, 'Waiting'), pr: field(text, 'PR') }
 }
 
+/** The questions a unit asked (`.ai-session/questions.md`) that `answers.md` doesn't answer yet. */
+export function openQuestions(questions: string, answers: string): { id: string; title: string }[] {
+  const answered = new Set([...answers.matchAll(ANSWER)].map(match => match[2]))
+  return [...questions.matchAll(QUESTION)]
+    .map(match => ({ id: match[1], title: match[2] }))
+    .filter(question => !answered.has(question.id))
+}
+
+/** A unit's open questions, read from its worktree. */
+async function asked($: EngineInterface, worktree: string) {
+  const questions = await $.fs.read(`${worktree}/.ai-session/questions.md`).catch(() => '')
+  if (!questions) return []
+  return openQuestions(questions, await $.fs.read(`${worktree}/.ai-session/answers.md`).catch(() => ''))
+}
+
 /** The background sessions `claude agents` lists, or none when it can't run. */
 async function agents($: EngineInterface): Promise<Agent[]> {
   const ran = await $.process.run(['claude', 'agents', '--json'], { timeoutMs: 20_000 }).catch(() => undefined)
@@ -101,8 +119,9 @@ export function board(list: readonly SprintPilotUnit[], at: string): string {
 // What the last refresh found, so a unit that starts waiting is announced once.
 let previous = new Map<string, SprintPilotUnit>()
 let refreshes = 0
-// The merged units the last refresh found, for the timer to hand over.
+// The merged units and the open questions the last refresh found, for the timer to hand over.
 let merged: SprintPilotUnit[] = []
+let questioned: { run: string; unit: string; questions: { id: string; title: string }[] }[] = []
 
 async function refresh($: EngineInterface): Promise<void> {
   if (!(await $.ui.panes()).some(pane => pane.id === PANE)) return
@@ -114,14 +133,20 @@ async function refresh($: EngineInterface): Promise<void> {
   const checkPrs = refreshes++ % PR_CHECK_EVERY === 0
   const list: SprintPilotUnit[] = []
   const found: SprintPilotUnit[] = []
+  const asking: typeof questioned = []
   for (const file of files) {
     const run = file.name.replace(/\.md$/, '')
     const rows = tableRows(await $.fs.read(`${root}/runs/${file.name}`).catch(() => ''))
     for (const [unit = '', story = '', , , worktree = '', , status = '', prCell = ''] of rows) {
       if (!SHOWN.has(status)) continue
-      const state = status === 'launched' && worktree ? await runState($, worktree) : undefined
+      const launched = status === 'launched' && worktree !== ''
+      const state = launched ? await runState($, worktree) : undefined
+      const questions = launched ? await asked($, worktree) : []
+      if (questions.length > 0) asking.push({ run, unit, questions })
       const agent = worktree ? sessions.find(one => normal(one.cwd) === normal(worktree)) : undefined
-      const asks = state?.waiting.startsWith('yes') ? state.waiting.replace(/^yes\s*[—-]?\s*/, '') || 'yes' : ''
+      const asks = questions.length > 0
+        ? questions.map(question => `${question.id} ${question.title}`).join('; ')
+        : state?.waiting.startsWith('yes') ? state.waiting.replace(/^yes\s*[—-]?\s*/, '') || 'yes' : ''
       const pr = prCell || (state && state.pr !== 'none' ? state.pr : '')
       const row: SprintPilotUnit = {
         run,
@@ -149,6 +174,7 @@ async function refresh($: EngineInterface): Promise<void> {
   $.ui.status(running || waiting ? `sprint: ${running} running · ${waiting} waiting for you` : undefined)
 
   merged = found
+  questioned = asking
   await update($, units, () => list)
   const now = new Date(await $.clock.now())
   await update($, refreshedAt, () => now.toTimeString().slice(0, 5))
@@ -166,10 +192,50 @@ async function handOverMerged($: EngineInterface): Promise<void> {
   }).catch(() => undefined) // /sprint status still finds the unit done
 }
 
+/** Hands each question a unit asks to this session once: `/sprint answer` relays the user's reply. */
+async function handOverQuestions($: EngineInterface): Promise<void> {
+  const done = new Set(((await $.store.get('questionsAsked')) as string[] | undefined) ?? [])
+  const fresh = questioned
+    .map(entry => ({ ...entry, questions: entry.questions.filter(q => !done.has(`${entry.run}/${entry.unit}/${q.id}`)) }))
+    .filter(entry => entry.questions.length > 0)
+  if (fresh.length === 0) return
+  const keys = fresh.flatMap(entry => entry.questions.map(q => `${entry.run}/${entry.unit}/${q.id}`))
+  await $.store.set('questionsAsked', [...done, ...keys])
+  const what = fresh
+    .map(entry => `${entry.unit} (${entry.run}) asks ${entry.questions.map(q => `${q.id} ${q.title}`).join(', ')}`)
+    .join('; ')
+  void $.prompt.submit({
+    text: `sprint-pilot board: ${what}. Run /sprint answer to show the user each question and relay the user's own reply.`,
+  }).catch(() => undefined) // the board still shows the question
+}
+
+/**
+ * In a unit's own session (its brief says `Answers: sprint-lead`): once the unit waits and the
+ * user's answer has been written to `.ai-session/answers.md`, start a turn that tells it so.
+ */
+async function wakeOnAnswers($: EngineInterface): Promise<void> {
+  const brief = await $.fs.read('.ai-session/launch.md').catch(() => '')
+  if (!/^Answers:\s*sprint-lead\b/m.test(brief)) return
+  const state = await runState($, '.')
+  if (!state?.waiting.startsWith('yes')) return
+  const answers = [...(await $.fs.read('.ai-session/answers.md').catch(() => '')).matchAll(ANSWER)]
+  const key = `answersWoken:${normal(await $.session.cwd())}`
+  const woken = new Set(((await $.store.get(key)) as string[] | undefined) ?? [])
+  const fresh = answers.filter(match => !woken.has(match[1]))
+  if (fresh.length === 0) return
+  await $.store.set(key, [...woken, ...fresh.map(match => match[1])])
+  const which = fresh.map(match => `${match[1]} → ${match[2]}`).join(', ')
+  void $.prompt.submit({
+    text: `sprint-pilot: the user's answer is in .ai-session/answers.md (${which}), written from the user's reply in the sprint session. Read it and go on.`,
+  }).catch(() => undefined) // the next beat tries again only for newer answers
+}
+
 /** One beat of the board's timer. */
 async function tick($: EngineInterface): Promise<void> {
   await refresh($)
   await handOverMerged($)
+  await handOverQuestions($)
+  await wakeOnAnswers($)
 }
 
 async function open($: EngineInterface): Promise<void> {
