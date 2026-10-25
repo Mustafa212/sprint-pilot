@@ -1,14 +1,15 @@
 import { expect, mock, test } from 'claude-code/testing'
 
-const HOME = 'C:/home/sp'
-const WT = 'C:/src/shop.worktrees/feat-1'
+// POSIX-style paths, absolute on every OS (a Windows engine may put a drive before them).
+const HOME = '/home/sp'
+const WT = '/src/shop.worktrees/feat-1'
 const RUN = [
   '# Sprint 7 — shop (started 2026-10-25)',
   '| Unit | Story | Repo | Branch ← base | Worktree | Workflow | Status | PR | Launched | Session |',
   '|---|---|---|---|---|---|---|---|---|---|',
-  `| u1 | 1 Export | C:/src/shop | feat/1 ← main | ${WT} | senior-dev | launched | | 2026-10-25 | |`,
-  '| u2 | 2 Import | C:/src/shop | feat/2 ← main | | senior-dev | queued | | | |',
-  '| u0 | 0 Old | C:/src/shop | feat/0 ← main | | senior-dev | cleaned | https://github.com/o/r/pull/1 | 2026-10-20 | |',
+  `| u1 | 1 Export | /src/shop | feat/1 ← main | ${WT} | senior-dev | launched | | 2026-10-25 | |`,
+  '| u2 | 2 Import | /src/shop | feat/2 ← main | | senior-dev | queued | | | |',
+  '| u0 | 0 Old | /src/shop | feat/0 ← main | | senior-dev | cleaned | https://github.com/o/r/pull/1 | 2026-10-20 | |',
   'Queue: u2 (waits for u1)',
 ].join('\n')
 const STATE = '# 1 — Export\nPhase: 2 — Plan   Last updated: x\nNEXT: wait for the plan approval\nWaiting: yes — plan approval   Base: main   PR: none\n'
@@ -18,7 +19,7 @@ const RUN_FILE = `${HOME}/runs/shop-sprint-7.md`
 // background session that is blocked, and a session that records the prompts it is handed.
 function engine(on: any, run = RUN) {
   const files: Record<string, string> = { [RUN_FILE]: run, [`${WT}/.ai-session/senior-dev/1.md`]: STATE }
-  const norm = (p: string) => p.replace(/\\/g, '/')
+  const norm = (p: string) => p.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '')
   const seen = { prompts: [] as string[], opened: 0 }
   mock.env(on, { SPRINT_PILOT_HOME: HOME })
   mock.store(on)
@@ -32,7 +33,7 @@ function engine(on: any, run = RUN) {
   on('process.run', () => ({
     value: {
       exitCode: 0,
-      stdout: JSON.stringify([{ id: 'ab12', cwd: 'C:\\src\\shop.worktrees\\feat-1', kind: 'background', state: 'blocked' }]),
+      stdout: JSON.stringify([{ id: 'ab12', cwd: WT, kind: 'background', state: 'blocked' }]),
       stderr: '',
       isStdoutTruncated: false,
       isStderrTruncated: false,
@@ -94,6 +95,6 @@ test('a merged unit is handed to the session for cleanup once, from the timer', 
 test('a write outside the runs folder leaves the board closed', async ($, on) => {
   const { seen } = engine(on)
   await $.tool.call({ tool: 'Write', file_path: `${HOME}/runs/shop-sprint-7/briefs/u1.md`, content: '' })
-  await $.tool.call({ tool: 'Write', file_path: 'C:/src/shop/README.md', content: '' })
+  await $.tool.call({ tool: 'Write', file_path: '/src/shop/README.md', content: '' })
   expect(seen.opened).toBe(0)
 })
