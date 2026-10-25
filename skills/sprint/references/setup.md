@@ -77,7 +77,7 @@ writes nothing.
    `npx` often miss the 30-second startup timeout: suggest `setx MCP_TIMEOUT 120000` (and a restart)
    before the first run, not after a failed one.
 3. Ask the default workflow, and check it's there: for senior-dev, `claude plugin list` shows
-   `senior-dev` at 1.12.0 or later (one approval per unit, and the PR question at its end); for superpowers, `superpowers`.
+   `senior-dev` at 1.13.0 or later (one approval per unit, answers from the sprint chat, the PR question at its end); for superpowers, `superpowers`.
    Missing or older: give the install or update command, or offer another workflow.
 4. Ask the launch mode:
    - **background** (recommended): each unit runs as a background session (`claude --bg`), started
