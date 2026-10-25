@@ -49,5 +49,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # 2.1.308 or later reads a hooks module (the sprint board) and runs its tests.
       - name: claude plugin validate
-        run: npx -y @anthropic-ai/claude-code@2.1.300 plugin validate .
+        run: npx -y @anthropic-ai/claude-code@2.1.310 plugin validate .
+      - name: the board's tests
+        run: npx -y @anthropic-ai/claude-code@2.1.310 plugin test .

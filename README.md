@@ -19,14 +19,17 @@ claude plugin marketplace add Mustafa212/sprint-pilot
 claude plugin install sprint-pilot@sprint-pilot
 ```
 
-Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.10.0 or later, which
-reads the launch brief each unit starts with (the story, the unit's scope, the tracker server and
-the review state), reports its progress to `/sprint status`, and asks to open the pull request at
-the end. `/sprint setup` checks it's installed.
+Recommended with it: [senior-dev](https://github.com/Mustafa212/senior-dev) 1.12.0 or later, which
+reads the launch brief each unit starts with (the story, the unit's scope, the tracker server, the
+review state and the gaps you already decided), asks for one approval of the unit's acceptance
+criteria and plan, reports its progress to the board, and asks at the end whether to open a pull
+request, to which branch and with which reviewers. `/sprint setup` checks it's installed.
 
 Background launches (the default) need a Claude Code version with `claude --bg` and agent view, and
 a repository you have trusted (run `claude` in it once). Claude Desktop launches need
-`claude --desktop` (macOS, or Windows x64).
+`claude --desktop` (macOS, or Windows x64), and cost two clicks per unit: Desktop asks to trust each
+new folder, and the first message is pasted from the clipboard. The sprint board needs Claude Code
+2.1.308 or later (it is a hooks module, `hooks/board.tsx`).
 
 ## Use
 
@@ -36,11 +39,19 @@ a repository you have trusted (run `claude` in it once). Claude Desktop launches
 | `/sprint plan --dry-run` | Everything up to the plan, read-only and without questions. |
 | `/sprint status` | Where every unit stands, and what's waiting on you. |
 | `/sprint setup` | Connect a source, or change the configuration. |
-| `/sprint cleanup` | Remove the worktrees and local branches of merged units. |
+| `/sprint cleanup` | Remove the worktrees and local branches of finished units. |
+| `/sprint-board` | Reopen the sprint board. |
 
 Each unit starts as a **background session** on its own worktree, already holding its first
-message, and shows in `claude agents`: you see which units wait for you, and `claude attach <id>`
-opens one. `/sprint status` reads the same states. Other launch modes: a **Claude Desktop** chat per
+message, and shows in `claude agents`: `claude attach <id>` opens one.
+
+**The sprint board** is a pane beside your sprint chat. It opens by itself once the plan is
+approved and refreshes every minute: each unit's phase, what it waits for from you, its pull
+request and its background session, with a notice when a unit starts waiting. When a unit's pull
+request merges (GitHub; `/sprint status` covers other hosts), the board hands it to the chat, which
+cleans it up without asking: the unit's chat closed, its `.ai-session/` archived, its worktree and
+local branch removed (`Cleanup: ask` in the config asks first). `/sprint status` adds the review
+state of each pull request and the cross-unit check. Other launch modes: a **Claude Desktop** chat per
 unit (the first message is on your clipboard to paste, since Desktop can't take it from the command
 line yet), or a **terminal** tab per unit.
 
@@ -104,7 +115,7 @@ rules above are the real barrier: they apply to every agent and every unit's cha
 
 ```
 ~/.claude/sprint-pilot/          (or $SPRINT_PILOT_HOME)
-  config.md                      sources, Azure DevOps orgs, default workflow, max parallel units, scout model, launch mode
+  config.md                      sources, Azure DevOps orgs, default workflow, max parallel units, scout model, launch mode, cleanup
   projects/<project>.md          repositories, tracker coordinates, branch patterns, End, PR target, review state
   runs/<project>-<sprint>.md     each run's source, units, branches, worktrees, pull requests and queue
   runs/<project>-<sprint>/       the units' briefs, and the archive /sprint cleanup keeps of each unit's .ai-session/
@@ -115,7 +126,8 @@ Worktrees sit beside each repository (`<repo>.worktrees/<branch>`), never inside
 ## Development
 
 Scripts have self-tests (`scripts/test/`), run in CI on Linux, macOS and Windows (on Windows also
-from Git Bash, as Claude's Bash tool runs them). `tests/contract/check.sh <senior-dev checkout>`
+from Git Bash, as Claude's Bash tool runs them). The board has its tests in `hooks/board.test.tsx`
+(`claude plugin test .`). `tests/contract/check.sh <senior-dev checkout>`
 checks that every launch-brief field is one senior-dev reads, and every state field `/sprint status`
 reads is one it writes. A fixture (`tests/fixture/`) gives a repository and a sprint file for dry
 runs. Releases: bump `version` in `.claude-plugin/plugin.json`, head the CHANGELOG entry with it,

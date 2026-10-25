@@ -3,6 +3,36 @@
 Newest first. Each entry records what changed and why, generically: no project names or ticket
 numbers.
 
+## 1.7.0 — 2026-10-25 (the sprint board; cleanup after merge)
+- **The sprint board** (`hooks/board.tsx`, a Claude Code hooks module): a pane in the sprint lead's
+  chat that opens by itself when the run file is written (`/sprint-board` reopens it). Every minute
+  it reads the run files, each unit's senior-dev state and `claude agents --json`, and shows each
+  unit's status, phase, what it waits for from the user, its next step, pull request and background
+  session; a notice says when a unit starts waiting, and the status line counts running and waiting
+  units. Why: the user had to keep running `/sprint status` or open each unit to know where it was.
+- **Cleanup after merge, without asking** (`Cleanup: after merge` in the config, the default; `ask`
+  keeps the question): once a unit's pull request merges (seen by the board on GitHub, or by
+  `/sprint status`), the board hands it to the chat, which closes the unit's chat, archives its
+  `.ai-session/`, removes the worktree and deletes the local branch, with the unsaved-commit check
+  first and nothing forced. Why: worktrees piled up until the user remembered `/sprint cleanup`, and
+  open chats kept the removed folders locked.
+- **Each unit's learnings at its cleanup:** what the brief or plan got wrong goes into the queued
+  units' saved briefs right away; project facts go into the workflow's notes as the unit learns
+  them, so units still running read them. The workflow's waiting proposals are applied once every
+  unit is cleaned. Why: lessons reached the other units only at the end of the sprint, and the
+  workflow's proposals were never applied because every run came from a brief.
+- **Gaps decided at planning stay decided:** the brief's gaps table has a `Decision` column, and the
+  unit doesn't ask a decided gap again. Why: units asked again what the user had answered on the plan.
+- **The end of a unit is decided at its end:** `End` and `PR target` are the recommended answers of
+  the unit's one question (pull request or not, which branch, which reviewers), and `PR target` is
+  set whatever `End` says. Why: the user wanted to choose at the end, not at planning.
+- **Before the first launch:** free memory and, when the tests need it, Docker are checked, and fewer
+  parallel units proposed when memory is short; the launch mode's cost is said plainly (desktop:
+  a trust click and a paste per unit, which the app and `claude --desktop` can't avoid yet;
+  background: neither), and desktop mode uses the app's `start_session` tool when the session has
+  it. Why: units were killed for memory while builds ran side by side, and the user expected the
+  trust prompt and the paste to be avoidable.
+
 ## 1.6.0 — 2026-10-21 (opt-in autopilot)
 - **`Autopilot: on` in the project file** (default off, set only when the user asks): each unit's
   brief gets `Approvals: auto` (the workflow takes its own recommendations instead of asking; see

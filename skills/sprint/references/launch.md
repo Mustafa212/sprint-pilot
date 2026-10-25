@@ -20,10 +20,19 @@ which may be days old. Update it first:
    heading).
 
 ## Before the first launch
-- When `End` is `pr` or `push-for-review`, each unit pushes its branch at the end and still asks once
-  in its own chat. A unit in a permission mode that blocks pushes can't push at all: tell the user,
-  and suggest an allow rule for `git push -u origin <the branch pattern's prefix>*` in their
-  settings. Never add it yourself.
+- Each unit asks once at its end whether to commit, push and open a pull request, to which branch
+  and with which reviewers; the brief's `End` and `PR target` are only the recommended answers. A
+  unit in a permission mode that blocks pushes can't push at all: tell the user, and suggest an
+  allow rule for `git push -u origin <the branch pattern's prefix>*` in their settings. Never add
+  it yourself.
+- **The machine:** free memory (Windows `(Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory`
+  in KB, macOS `vm_stat`, Linux `free -m`) and, when the project's notes or setup say its tests need
+  Docker, `docker info`. Under about 2 GB free per unit starting now, propose starting fewer: units
+  whose builds and tests run side by side get killed for memory. Docker down: say so first.
+- **Launch mode:** background passes each unit its first message and takes the main repository's
+  trust, so nothing is pasted or trusted per unit; the board shows where each one is. Desktop mode
+  costs two clicks per unit, because the desktop app asks to trust every new folder and
+  `claude --desktop` can't take a first message: say so when the config says desktop.
 
 ## For each unit that starts now, in plan order, one at a time
 1. **Worktree.** In the unit's repository: `git fetch origin`, then
@@ -31,7 +40,8 @@ which may be days old. Update it first:
    (`<branch-slug>`: the branch name in lowercase with `/` and `_` turned into `-`; `--no-track` so
    the branch never pushes to the base). Never inside the repository folder. These are sprint-pilot's
    own worktrees, not Claude Code's `.claude/worktrees/`, so the plan's branch names and stacking
-   hold; Claude Code still treats each one as trusted when its main repository is.
+   hold. The CLI (background and terminal modes) treats each as trusted when its main repository
+   is; the desktop app asks once per new folder, inside the repository or not.
    - A branch the plan reuses (no commits of its own): `-B` instead of `-b`, which moves it to the
      current base and loses nothing.
    - A stacked unit: start from the other unit's local branch instead of `origin/<base>`, and write
@@ -45,7 +55,10 @@ which may be days old. Update it first:
    then run the install command. A failure: report it and ask whether to launch anyway.
 4. **Brief.** Copy the unit's saved brief to `.ai-session/launch.md` in the worktree.
 5. **Start the unit** with the launch script and the config's launch mode (`<plugin>` is this
-   plugin's folder, from SKILL.md). The script builds the first message from the workflow:
+   plugin's folder, from SKILL.md). In desktop mode, when this session has the desktop app's
+   `start_session` tool, use it instead: the worktree as the folder and the script's first message
+   for the workflow (in `launch.ps1`), so nothing is pasted; record the session it reports in the
+   `Session` column. The script builds the first message from the workflow:
    - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File "<plugin>/scripts/launch.ps1" -Dir "<worktree>" -Mode <mode> -Workflow <workflow>`
    - macOS and Linux: `bash "<plugin>/scripts/launch.sh" --dir "<worktree>" --mode <mode> --workflow <workflow>`
 
@@ -94,8 +107,8 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 </story>
 
 ## Gaps found by the scout, from <plan date> (a starting point: re-check them; they are not findings)
-| # | Gap | Story line | Blocks start? | Who decides | Recommendation |
-|---|---|---|---|---|---|
+| # | Gap | Story line | Blocks start? | Who decides | Recommendation | Decision |
+|---|---|---|---|---|---|---|
 - Settled by the code: <question — answer (`file:line`); …, or none>
 - Already in the code: <what exists (`file:line`) and what's still missing, or nothing found>
 - Out of scope (per the story): <…, or not stated>
@@ -117,10 +130,11 @@ Attachments: <name (id); …, or none> — download them with the Source server 
 - D-<n>: <the decision, from the run file> — owned by <unit (branch)>; or "none"
 
 ## Learnings for the sprint lead
-After the unit ends, write `.ai-session/sprint-learnings.md` (never committed): what you learned
-about the project (flows, conventions, traps, with `file:line`), what you discovered and left
-alone (bugs, risky areas, rule breaks), what this brief or the plan got wrong or missed, and what
-slowed you down or helped, with one improvement each. No story text and no secrets.
+Project facts (flows, conventions, traps, with `file:line`) go into your workflow's project notes
+as soon as you learn them, so the units still running and the next sessions read them. After the
+unit ends, write `.ai-session/sprint-learnings.md` (never committed) for the sprint lead: what you
+discovered and left alone (bugs, risky areas, rule breaks), what this brief or the plan got wrong or
+missed, and what slowed you down or helped, with one improvement each. No story text and no secrets.
 
 ## Merged before this unit (only in a brief launched later)
 - <pull request link> — <title>
@@ -134,10 +148,13 @@ slowed you down or helped, with one improvement each. No story text and no secre
   under it). File source: `none`.
 - `Approvals`: `auto` when the project file says `Autopilot: on`, else `user`. With `auto` the
   workflow takes its own recommendations instead of asking (senior-dev's launch brief reference).
-- `End`: the run's choice. `PR target` is `none` unless `End` is `pr`.
+- `End`: the run's choice, which the unit offers first at its end; the user can still pick another.
 - `PR target`: the base when the project's rule is sprint-branch, the default branch for
-  default-branch; for ask, the answer from planning. A stacked unit's PR target stays that rule,
-  never the branch it's stacked on.
+  default-branch; for ask, the answer from planning. Set it whatever `End` says, since the unit
+  may still open a pull request. A stacked unit's PR target stays that rule, never the branch it's
+  stacked on.
+- Gaps `Decision`: the user's answer at planning, written `decided at planning: <answer> (user,
+  <date>)`, else `open`. The unit lists a decided gap as decided and doesn't ask it again.
 
 ## Run file
 
@@ -152,7 +169,8 @@ Queue: <unit> (waits for <unit> | held: gap #n), …
 ```
 
 `Status`: planned, queued, stacked, held, launched, done (pull request merged), or cleaned. `PR`:
-the pull request's URL once `/sprint status` finds it. `Session`: the background session's id
+the pull request's URL once `/sprint status` finds it. The board reads this table as it is: keep
+its columns and statuses as written here. `Session`: the background session's id
 (background mode), else empty.
 
 ## Telling a running unit something

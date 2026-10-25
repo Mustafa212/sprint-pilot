@@ -16,7 +16,12 @@ Default workflow: senior-dev            (senior-dev | superpowers | none)
 Max parallel units: 3
 Scout model: opus                       (opus | sonnet)
 Launch: background                      (background | desktop | terminal)
+Cleanup: after merge                    (after merge | ask; missing: after merge)
 ```
+
+`Cleanup: after merge` cleans a unit up as soon as its pull request merges (its chat closed, its
+`.ai-session/` archived, its worktree and local branch removed), with no question; `ask` asks
+first, as for every other finished unit.
 
 `projects/<project>.md`:
 
@@ -72,19 +77,21 @@ writes nothing.
    `npx` often miss the 30-second startup timeout: suggest `setx MCP_TIMEOUT 120000` (and a restart)
    before the first run, not after a failed one.
 3. Ask the default workflow, and check it's there: for senior-dev, `claude plugin list` shows
-   `senior-dev` at 1.10.0 or later (it reads the brief's `End:` line); for superpowers, `superpowers`.
+   `senior-dev` at 1.12.0 or later (one approval per unit, and the PR question at its end); for superpowers, `superpowers`.
    Missing or older: give the install or update command, or offer another workflow.
 4. Ask the launch mode:
    - **background** (recommended): each unit runs as a background session (`claude --bg`), started
      with its first message (nothing to paste) and listed in `claude agents`, where the user sees
-     which units wait for them and opens one with `claude attach <id>`. The repository must be
-     trusted: the user has run `claude` in it once and accepted the prompt (a worktree takes its
-     main repository's trust).
+     which units wait for them and opens one with `claude attach <id>`; the sprint board shows the
+     same beside the chat. The repository must be trusted: the user has run `claude` in it once and
+     accepted the prompt (a worktree takes its main repository's trust). Background sessions don't
+     show in the desktop app's sidebar.
    - **desktop**: one Claude Desktop chat per unit (`claude --desktop` works on macOS and Windows
-     x64); the first message goes on the clipboard to paste.
+     x64). Two clicks per unit: the app asks to trust each new folder, and the first message goes on
+     the clipboard to paste, since `claude --desktop` can't take one yet.
    - **terminal**: one terminal tab per unit.
 
-   Write `config.md` and show it.
+   Then the cleanup (`Cleanup:` above; recommend after merge). Write `config.md` and show it.
 
 ## First run on a project
 Ask only what can't be found:
